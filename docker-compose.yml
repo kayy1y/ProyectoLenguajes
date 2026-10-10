@@ -1,0 +1,45 @@
+name: gamestats
+
+services:
+  analytics:
+    build:
+      context: .
+      dockerfile: analytics-scala/Dockerfile
+    environment:
+      HTTP_PORT: "8081"
+      JAVA_OPTS: ${JAVA_OPTS:--XX:MaxRAMPercentage=75}
+    expose:
+      - "8081"
+    networks: [gamestats-net]
+
+  ingestion:
+    build:
+      context: .
+      dockerfile: ingestion-go/Dockerfile
+    environment:
+      HTTP_ADDR: ":8080"
+      ANALYTICS_URL: http://analytics:8081
+      ANALYZER_WORKERS: ${ANALYZER_WORKERS:-4}
+      ANALYZE_TIMEOUT: ${ANALYZE_TIMEOUT:-5s}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "8080:8080"
+    depends_on:
+      analytics:
+        condition: service_healthy
+    networks: [gamestats-net]
+
+  simulator:
+    build:
+      context: .
+      dockerfile: simulator/Dockerfile
+    profiles: [demo]
+    environment:
+      TARGET_URL: http://ingestion:8080
+    depends_on:
+      ingestion:
+        condition: service_healthy
+    networks: [gamestats-net]
+
+networks:
+  gamestats-net: {}
