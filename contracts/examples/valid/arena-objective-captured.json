@@ -1,0 +1,13 @@
+{
+  "eventId": "ex1-e06",
+  "timestamp": "2026-10-01T15:00:50Z",
+  "gameId": "arena-combat",
+  "gameVersion": "1.0",
+  "matchId": "match-ex1",
+  "playerId": "p2",
+  "type": "OBJECTIVE_CAPTURED",
+  "seq": 6,
+  "data": {
+    "objectiveId": "flag-A"
+  }
+}

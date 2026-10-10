@@ -1,0 +1,10 @@
+{"eventId":"f13-e01","timestamp":"2026-10-01T15:00:00Z","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-f13","type":"MATCH_STARTED","seq":1,"data":{"map":"dust"}}
+{"eventId":"f13-e02","timestamp":"2026-10-01T15:00:01Z","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-f13","playerId":"p1","type":"PLAYER_JOINED","seq":2,"data":{}}
+{"eventId":"f13-e03","timestamp":"2026-10-01T15:00:01Z","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-f13","playerId":"p2","type":"PLAYER_JOINED","seq":3,"data":{}}
+{"eventId":"f13-e04","timestamp":"2026-10-01T15:00:10Z","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-f13","playerId":"p1","type":"ATTACK","seq":4,"data":{"targetPlayerId":"p2","weapon":"rifle","hit":true,"damage":50}}
+{"eventId":"f13-e05","timestamp":"2026-10-01T15:00:11Z","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-f13","playerId":"p1","type":"ELIMINATION","seq":5,"data":{"victimPlayerId":"ghost","weapon":"rifle"}}
+{"eventId":"f13-e06","timestamp":"2026-10-01T15:00:12Z","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-f13","playerId":"p2","type":"ELIMINATION","seq":6,"data":{"victimPlayerId":"p2","weapon":"rifle"}}
+{"eventId":"f13-e07","timestamp":"2026-10-01T15:00:15Z","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-f13","playerId":"p2","type":"ATTACK","seq":7,"data":{"targetPlayerId":"p2","weapon":"rifle","hit":true,"damage":10}}
+{"eventId":"f13-e08","timestamp":"2026-10-01T15:00:20Z","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-f13","playerId":"p1","type":"ELIMINATION","seq":8,"data":{"victimPlayerId":"p2","weapon":"rifle"}}
+{"eventId":"f13-e09","timestamp":"2026-10-01T15:00:25Z","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-f13","playerId":"ghost2","type":"OBJECTIVE_CAPTURED","seq":9,"data":{"objectiveId":"flag-A"}}
+{"eventId":"f13-e10","timestamp":"2026-10-01T15:01:00Z","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-f13","type":"MATCH_FINISHED","seq":10,"data":{"reason":"COMPLETED"}}

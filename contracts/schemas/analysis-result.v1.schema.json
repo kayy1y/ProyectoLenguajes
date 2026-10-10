@@ -1,0 +1,86 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GameStats analysis result v1 (Scala -> Go)",
+  "description": "Respuesta 200 de POST /v1/analyze. Es determinista: la misma entrada produce exactamente el mismo resultado. Las métricas que no se pueden calcular valen null.",
+  "type": "object",
+  "required": ["resultVersion", "gameId", "gameVersion", "matchId", "completeness", "input", "matchStats", "playerStats", "patterns", "warnings"],
+  "additionalProperties": false,
+  "properties": {
+    "resultVersion": { "const": "1" },
+    "gameId": { "type": "string" },
+    "gameVersion": { "type": "string" },
+    "matchId": { "type": "string" },
+    "completeness": { "enum": ["COMPLETE", "INCOMPLETE"] },
+    "input": {
+      "type": "object",
+      "required": ["eventsReceived", "eventsUsed", "eventsIgnored"],
+      "additionalProperties": false,
+      "properties": {
+        "eventsReceived": { "type": "integer", "minimum": 0 },
+        "eventsUsed": { "type": "integer", "minimum": 0 },
+        "eventsIgnored": { "type": "integer", "minimum": 0 }
+      }
+    },
+    "matchStats": {
+      "type": "object",
+      "required": ["durationSeconds", "participants", "totalEvents", "metrics"],
+      "additionalProperties": false,
+      "properties": {
+        "durationSeconds": { "type": ["number", "null"], "minimum": 0 },
+        "participants": { "type": "integer", "minimum": 0 },
+        "totalEvents": { "type": "integer", "minimum": 0, "description": "Eventos usados en el análisis (= input.eventsUsed)." },
+        "metrics": { "$ref": "#/$defs/Metrics" }
+      }
+    },
+    "playerStats": {
+      "type": "array",
+      "description": "Un elemento por jugador que hizo PLAYER_JOINED, ordenado por playerId.",
+      "items": {
+        "type": "object",
+        "required": ["playerId", "metrics"],
+        "additionalProperties": false,
+        "properties": {
+          "playerId": { "type": "string" },
+          "metrics": { "$ref": "#/$defs/Metrics" }
+        }
+      }
+    },
+    "patterns": {
+      "type": "array",
+      "description": "Patrones secuenciales detectados, ordenados por 'from' y luego por playerId.",
+      "items": {
+        "type": "object",
+        "required": ["type", "playerId", "fromEventId", "toEventId", "from", "to"],
+        "properties": {
+          "type": { "type": "string", "pattern": "^[A-Z][A-Z_]{2,40}$" },
+          "playerId": { "type": "string" },
+          "fromEventId": { "type": "string" },
+          "toEventId": { "type": "string" },
+          "from": { "$ref": "event.v1.schema.json#/$defs/UtcTimestamp" },
+          "to": { "$ref": "event.v1.schema.json#/$defs/UtcTimestamp" }
+        },
+        "additionalProperties": { "type": ["number", "string", "null"] }
+      }
+    },
+    "warnings": {
+      "type": "array",
+      "description": "Eventos estructuralmente válidos pero semánticamente contradictorios; se excluyen de las métricas. Orden: el del análisis.",
+      "items": {
+        "type": "object",
+        "required": ["eventId", "code", "message"],
+        "additionalProperties": false,
+        "properties": {
+          "eventId": { "type": "string" },
+          "code": { "type": "string", "pattern": "^[A-Z][A-Z_]{2,40}$" },
+          "message": { "type": "string" }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "Metrics": {
+      "type": "object",
+      "additionalProperties": { "type": ["number", "string", "null"] }
+    }
+  }
+}

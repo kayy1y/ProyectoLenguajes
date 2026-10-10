@@ -1,0 +1,98 @@
+{
+  "resultVersion": "1",
+  "gameId": "arena-combat",
+  "gameVersion": "1.0",
+  "matchId": "match-f11",
+  "completeness": "COMPLETE",
+  "input": {
+    "eventsReceived": 20,
+    "eventsUsed": 20,
+    "eventsIgnored": 0
+  },
+  "matchStats": {
+    "durationSeconds": 80,
+    "participants": 4,
+    "totalEvents": 20,
+    "metrics": {
+      "totalEliminations": 7,
+      "totalDamage": 700,
+      "eliminationsPerMinute": 5.25,
+      "topPlayerId": "p1"
+    }
+  },
+  "playerStats": [
+    {
+      "playerId": "p1",
+      "metrics": {
+        "attacks": 4,
+        "hits": 4,
+        "accuracy": 1.0,
+        "damageDealt": 400,
+        "eliminations": 4,
+        "deaths": 1,
+        "objectivesCaptured": 0,
+        "killEfficiency": 1.0
+      }
+    },
+    {
+      "playerId": "p2",
+      "metrics": {
+        "attacks": 0,
+        "hits": 0,
+        "accuracy": null,
+        "damageDealt": 0,
+        "eliminations": 0,
+        "deaths": 3,
+        "objectivesCaptured": 0,
+        "killEfficiency": null
+      }
+    },
+    {
+      "playerId": "p3",
+      "metrics": {
+        "attacks": 3,
+        "hits": 3,
+        "accuracy": 1.0,
+        "damageDealt": 300,
+        "eliminations": 3,
+        "deaths": 1,
+        "objectivesCaptured": 0,
+        "killEfficiency": 1.0
+      }
+    },
+    {
+      "playerId": "p4",
+      "metrics": {
+        "attacks": 0,
+        "hits": 0,
+        "accuracy": null,
+        "damageDealt": 0,
+        "eliminations": 0,
+        "deaths": 2,
+        "objectivesCaptured": 0,
+        "killEfficiency": null
+      }
+    }
+  ],
+  "patterns": [
+    {
+      "type": "KILL_STREAK",
+      "playerId": "p1",
+      "fromEventId": "f11-e07",
+      "toEventId": "f11-e13",
+      "from": "2026-10-01T15:00:10Z",
+      "to": "2026-10-01T15:00:40Z",
+      "length": 4
+    },
+    {
+      "type": "KILL_STREAK",
+      "playerId": "p3",
+      "fromEventId": "f11-e15",
+      "toEventId": "f11-e19",
+      "from": "2026-10-01T15:00:50Z",
+      "to": "2026-10-01T15:01:10Z",
+      "length": 3
+    }
+  ],
+  "warnings": []
+}

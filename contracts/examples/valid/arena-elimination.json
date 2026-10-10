@@ -1,0 +1,14 @@
+{
+  "eventId": "ex1-e05",
+  "timestamp": "2026-10-01T15:00:12Z",
+  "gameId": "arena-combat",
+  "gameVersion": "1.0",
+  "matchId": "match-ex1",
+  "playerId": "p1",
+  "type": "ELIMINATION",
+  "seq": 5,
+  "data": {
+    "victimPlayerId": "p2",
+    "weapon": "rifle"
+  }
+}

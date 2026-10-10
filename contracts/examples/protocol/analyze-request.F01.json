@@ -1,0 +1,337 @@
+{
+  "contractVersion": "1",
+  "batchId": "arena-combat:match-a1:1",
+  "gameId": "arena-combat",
+  "gameVersion": "1.0",
+  "matchId": "match-a1",
+  "completeness": "COMPLETE",
+  "closedReason": "MATCH_FINISHED",
+  "events": [
+    {
+      "eventId": "a1-e01",
+      "timestamp": "2026-10-01T15:00:00Z",
+      "gameId": "arena-combat",
+      "gameVersion": "1.0",
+      "matchId": "match-a1",
+      "type": "MATCH_STARTED",
+      "seq": 1,
+      "data": {
+        "map": "dust"
+      },
+      "ingest": {
+        "receivedAt": "2026-10-09T18:00:00.000Z",
+        "seq": 0
+      }
+    },
+    {
+      "eventId": "a1-e02",
+      "timestamp": "2026-10-01T15:00:01Z",
+      "gameId": "arena-combat",
+      "gameVersion": "1.0",
+      "matchId": "match-a1",
+      "playerId": "p1",
+      "type": "PLAYER_JOINED",
+      "seq": 2,
+      "data": {},
+      "ingest": {
+        "receivedAt": "2026-10-09T18:00:00.100Z",
+        "seq": 1
+      }
+    },
+    {
+      "eventId": "a1-e03",
+      "timestamp": "2026-10-01T15:00:01Z",
+      "gameId": "arena-combat",
+      "gameVersion": "1.0",
+      "matchId": "match-a1",
+      "playerId": "p2",
+      "type": "PLAYER_JOINED",
+      "seq": 3,
+      "data": {},
+      "ingest": {
+        "receivedAt": "2026-10-09T18:00:00.200Z",
+        "seq": 2
+      }
+    },
+    {
+      "eventId": "a1-e04",
+      "timestamp": "2026-10-01T15:00:02Z",
+      "gameId": "arena-combat",
+      "gameVersion": "1.0",
+      "matchId": "match-a1",
+      "playerId": "p3",
+      "type": "PLAYER_JOINED",
+      "seq": 4,
+      "data": {},
+      "ingest": {
+        "receivedAt": "2026-10-09T18:00:00.300Z",
+        "seq": 3
+      }
+    },
+    {
+      "eventId": "a1-e05",
+      "timestamp": "2026-10-01T15:00:10Z",
+      "gameId": "arena-combat",
+      "gameVersion": "1.0",
+      "matchId": "match-a1",
+      "playerId": "p1",
+      "type": "ATTACK",
+      "seq": 5,
+      "data": {
+        "targetPlayerId": "p2",
+        "weapon": "rifle",
+        "hit": true,
+        "damage": 40
+      },
+      "ingest": {
+        "receivedAt": "2026-10-09T18:00:00.400Z",
+        "seq": 4
+      }
+    },
+    {
+      "eventId": "a1-e06",
+      "timestamp": "2026-10-01T15:00:12Z",
+      "gameId": "arena-combat",
+      "gameVersion": "1.0",
+      "matchId": "match-a1",
+      "playerId": "p1",
+      "type": "ATTACK",
+      "seq": 6,
+      "data": {
+        "targetPlayerId": "p2",
+        "weapon": "rifle",
+        "hit": true,
+        "damage": 60
+      },
+      "ingest": {
+        "receivedAt": "2026-10-09T18:00:00.500Z",
+        "seq": 5
+      }
+    },
+    {
+      "eventId": "a1-e07",
+      "timestamp": "2026-10-01T15:00:12Z",
+      "gameId": "arena-combat",
+      "gameVersion": "1.0",
+      "matchId": "match-a1",
+      "playerId": "p1",
+      "type": "ELIMINATION",
+      "seq": 7,
+      "data": {
+        "victimPlayerId": "p2",
+        "weapon": "rifle"
+      },
+      "ingest": {
+        "receivedAt": "2026-10-09T18:00:00.600Z",
+        "seq": 6
+      }
+    },
+    {
+      "eventId": "a1-e08",
+      "timestamp": "2026-10-01T15:00:20Z",
+      "gameId": "arena-combat",
+      "gameVersion": "1.0",
+      "matchId": "match-a1",
+      "playerId": "p2",
+      "type": "ATTACK",
+      "seq": 8,
+      "data": {
+        "targetPlayerId": "p1",
+        "weapon": "rifle",
+        "hit": false,
+        "damage": 0
+      },
+      "ingest": {
+        "receivedAt": "2026-10-09T18:00:00.700Z",
+        "seq": 7
+      }
+    },
+    {
+      "eventId": "a1-e09",
+      "timestamp": "2026-10-01T15:00:25Z",
+      "gameId": "arena-combat",
+      "gameVersion": "1.0",
+      "matchId": "match-a1",
+      "playerId": "p1",
+      "type": "ATTACK",
+      "seq": 9,
+      "data": {
+        "targetPlayerId": "p3",
+        "weapon": "rifle",
+        "hit": true,
+        "damage": 100
+      },
+      "ingest": {
+        "receivedAt": "2026-10-09T18:00:00.800Z",
+        "seq": 8
+      }
+    },
+    {
+      "eventId": "a1-e10",
+      "timestamp": "2026-10-01T15:00:25Z",
+      "gameId": "arena-combat",
+      "gameVersion": "1.0",
+      "matchId": "match-a1",
+      "playerId": "p1",
+      "type": "ELIMINATION",
+      "seq": 10,
+      "data": {
+        "victimPlayerId": "p3",
+        "weapon": "rifle"
+      },
+      "ingest": {
+        "receivedAt": "2026-10-09T18:00:00.900Z",
+        "seq": 9
+      }
+    },
+    {
+      "eventId": "a1-e11",
+      "timestamp": "2026-10-01T15:00:30Z",
+      "gameId": "arena-combat",
+      "gameVersion": "1.0",
+      "matchId": "match-a1",
+      "playerId": "p3",
+      "type": "ATTACK",
+      "seq": 11,
+      "data": {
+        "targetPlayerId": "p1",
+        "weapon": "rifle",
+        "hit": true,
+        "damage": 30
+      },
+      "ingest": {
+        "receivedAt": "2026-10-09T18:00:01.000Z",
+        "seq": 10
+      }
+    },
+    {
+      "eventId": "a1-e12",
+      "timestamp": "2026-10-01T15:00:40Z",
+      "gameId": "arena-combat",
+      "gameVersion": "1.0",
+      "matchId": "match-a1",
+      "playerId": "p1",
+      "type": "ATTACK",
+      "seq": 12,
+      "data": {
+        "targetPlayerId": "p2",
+        "weapon": "rifle",
+        "hit": true,
+        "damage": 100
+      },
+      "ingest": {
+        "receivedAt": "2026-10-09T18:00:01.100Z",
+        "seq": 11
+      }
+    },
+    {
+      "eventId": "a1-e13",
+      "timestamp": "2026-10-01T15:00:40Z",
+      "gameId": "arena-combat",
+      "gameVersion": "1.0",
+      "matchId": "match-a1",
+      "playerId": "p1",
+      "type": "ELIMINATION",
+      "seq": 13,
+      "data": {
+        "victimPlayerId": "p2",
+        "weapon": "rifle"
+      },
+      "ingest": {
+        "receivedAt": "2026-10-09T18:00:01.200Z",
+        "seq": 12
+      }
+    },
+    {
+      "eventId": "a1-e14",
+      "timestamp": "2026-10-01T15:00:50Z",
+      "gameId": "arena-combat",
+      "gameVersion": "1.0",
+      "matchId": "match-a1",
+      "playerId": "p2",
+      "type": "OBJECTIVE_CAPTURED",
+      "seq": 14,
+      "data": {
+        "objectiveId": "flag-A"
+      },
+      "ingest": {
+        "receivedAt": "2026-10-09T18:00:01.300Z",
+        "seq": 13
+      }
+    },
+    {
+      "eventId": "a1-e15",
+      "timestamp": "2026-10-01T15:00:55Z",
+      "gameId": "arena-combat",
+      "gameVersion": "1.0",
+      "matchId": "match-a1",
+      "playerId": "p2",
+      "type": "ATTACK",
+      "seq": 15,
+      "data": {
+        "targetPlayerId": "p1",
+        "weapon": "rifle",
+        "hit": true,
+        "damage": 100
+      },
+      "ingest": {
+        "receivedAt": "2026-10-09T18:00:01.400Z",
+        "seq": 14
+      }
+    },
+    {
+      "eventId": "a1-e16",
+      "timestamp": "2026-10-01T15:00:55Z",
+      "gameId": "arena-combat",
+      "gameVersion": "1.0",
+      "matchId": "match-a1",
+      "playerId": "p2",
+      "type": "ELIMINATION",
+      "seq": 16,
+      "data": {
+        "victimPlayerId": "p1",
+        "weapon": "rifle"
+      },
+      "ingest": {
+        "receivedAt": "2026-10-09T18:00:01.500Z",
+        "seq": 15
+      }
+    },
+    {
+      "eventId": "a1-e17",
+      "timestamp": "2026-10-01T15:01:00Z",
+      "gameId": "arena-combat",
+      "gameVersion": "1.0",
+      "matchId": "match-a1",
+      "playerId": "p1",
+      "type": "ATTACK",
+      "seq": 17,
+      "data": {
+        "targetPlayerId": "p3",
+        "weapon": "rifle",
+        "hit": false,
+        "damage": 0
+      },
+      "ingest": {
+        "receivedAt": "2026-10-09T18:00:01.600Z",
+        "seq": 16
+      }
+    },
+    {
+      "eventId": "a1-e18",
+      "timestamp": "2026-10-01T15:02:00Z",
+      "gameId": "arena-combat",
+      "gameVersion": "1.0",
+      "matchId": "match-a1",
+      "type": "MATCH_FINISHED",
+      "seq": 18,
+      "data": {
+        "reason": "COMPLETED"
+      },
+      "ingest": {
+        "receivedAt": "2026-10-09T18:00:01.700Z",
+        "seq": 17
+      }
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "resultVersion": "1",
+  "gameId": "arena-combat",
+  "gameVersion": "1.0",
+  "matchId": "match-f12",
+  "completeness": "COMPLETE",
+  "input": {
+    "eventsReceived": 17,
+    "eventsUsed": 17,
+    "eventsIgnored": 0
+  },
+  "matchStats": {
+    "durationSeconds": 120,
+    "participants": 3,
+    "totalEvents": 17,
+    "metrics": {
+      "totalEliminations": 4,
+      "totalDamage": 400,
+      "eliminationsPerMinute": 2.0,
+      "topPlayerId": "p1"
+    }
+  },
+  "playerStats": [
+    {
+      "playerId": "p1",
+      "metrics": {
+        "attacks": 5,
+        "hits": 4,
+        "accuracy": 0.8,
+        "damageDealt": 300,
+        "eliminations": 3,
+        "deaths": 1,
+        "objectivesCaptured": 0,
+        "killEfficiency": 0.6
+      }
+    },
+    {
+      "playerId": "p2",
+      "metrics": {
+        "attacks": 2,
+        "hits": 1,
+        "accuracy": 0.5,
+        "damageDealt": 100,
+        "eliminations": 1,
+        "deaths": 2,
+        "objectivesCaptured": 1,
+        "killEfficiency": 0.5
+      }
+    },
+    {
+      "playerId": "p3",
+      "metrics": {
+        "attacks": 0,
+        "hits": 0,
+        "accuracy": null,
+        "damageDealt": 0,
+        "eliminations": 0,
+        "deaths": 1,
+        "objectivesCaptured": 0,
+        "killEfficiency": null
+      }
+    }
+  ],
+  "patterns": [],
+  "warnings": []
+}

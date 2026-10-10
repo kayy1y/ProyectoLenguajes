@@ -1,0 +1,74 @@
+{
+  "resultVersion": "1",
+  "gameId": "arena-combat",
+  "gameVersion": "1.0",
+  "matchId": "match-f13",
+  "completeness": "COMPLETE",
+  "input": {
+    "eventsReceived": 10,
+    "eventsUsed": 6,
+    "eventsIgnored": 4
+  },
+  "matchStats": {
+    "durationSeconds": 60,
+    "participants": 2,
+    "totalEvents": 6,
+    "metrics": {
+      "totalEliminations": 1,
+      "totalDamage": 50,
+      "eliminationsPerMinute": 1.0,
+      "topPlayerId": "p1"
+    }
+  },
+  "playerStats": [
+    {
+      "playerId": "p1",
+      "metrics": {
+        "attacks": 1,
+        "hits": 1,
+        "accuracy": 1.0,
+        "damageDealt": 50,
+        "eliminations": 1,
+        "deaths": 0,
+        "objectivesCaptured": 0,
+        "killEfficiency": 1.0
+      }
+    },
+    {
+      "playerId": "p2",
+      "metrics": {
+        "attacks": 0,
+        "hits": 0,
+        "accuracy": null,
+        "damageDealt": 0,
+        "eliminations": 0,
+        "deaths": 1,
+        "objectivesCaptured": 0,
+        "killEfficiency": null
+      }
+    }
+  ],
+  "patterns": [],
+  "warnings": [
+    {
+      "eventId": "f13-e05",
+      "code": "UNKNOWN_VICTIM",
+      "message": "victimPlayerId 'ghost' no se unió a la partida"
+    },
+    {
+      "eventId": "f13-e06",
+      "code": "SELF_ELIMINATION",
+      "message": "el jugador 'p2' no puede eliminarse a sí mismo"
+    },
+    {
+      "eventId": "f13-e07",
+      "code": "SELF_TARGET",
+      "message": "el jugador 'p2' no puede atacarse a sí mismo"
+    },
+    {
+      "eventId": "f13-e09",
+      "code": "UNKNOWN_PLAYER",
+      "message": "playerId 'ghost2' no se unió a la partida"
+    }
+  ]
+}

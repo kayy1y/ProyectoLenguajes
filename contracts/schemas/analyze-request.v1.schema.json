@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "GameStats analyze request v1 (Go -> Scala)",
+  "description": "Cuerpo de POST /v1/analyze. Contiene todos los eventos aceptados de una partida cerrada, ordenados por (timestamp, seq ausente = +inf, ingest.seq).",
+  "type": "object",
+  "required": ["contractVersion", "batchId", "gameId", "gameVersion", "matchId", "completeness", "closedReason", "events"],
+  "additionalProperties": false,
+  "properties": {
+    "contractVersion": { "const": "1" },
+    "batchId": {
+      "type": "string",
+      "pattern": "^[a-z0-9-]{2,32}:[A-Za-z0-9._-]{1,64}:[0-9]+$",
+      "description": "gameId:matchId:intento"
+    },
+    "gameId": { "type": "string", "pattern": "^[a-z0-9-]{2,32}$" },
+    "gameVersion": { "type": "string", "pattern": "^[0-9]+\\.[0-9]+$" },
+    "matchId": { "type": "string", "pattern": "^[A-Za-z0-9._-]{1,64}$" },
+    "completeness": {
+      "enum": ["COMPLETE", "INCOMPLETE"],
+      "description": "COMPLETE si llegó MATCH_FINISHED; INCOMPLETE si la partida se cerró por inactividad o apagado."
+    },
+    "closedReason": { "enum": ["MATCH_FINISHED", "IDLE_TIMEOUT", "SHUTDOWN"] },
+    "events": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/IngestedEvent" }
+    }
+  },
+  "$defs": {
+    "IngestedEvent": {
+      "$ref": "event.v1.schema.json#/$defs/EventCore",
+      "required": ["ingest"],
+      "properties": {
+        "ingest": {
+          "type": "object",
+          "required": ["receivedAt", "seq"],
+          "additionalProperties": false,
+          "properties": {
+            "receivedAt": { "$ref": "event.v1.schema.json#/$defs/UtcTimestamp" },
+            "seq": { "type": "integer", "minimum": 0, "description": "Orden de llegada dentro de la partida, asignado por Go." }
+          }
+        }
+      },
+      "unevaluatedProperties": false
+    }
+  }
+}

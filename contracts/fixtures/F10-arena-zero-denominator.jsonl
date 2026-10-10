@@ -1,0 +1,7 @@
+{"eventId":"f10-e01","timestamp":"2026-10-01T15:00:00Z","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-f10","type":"MATCH_STARTED","seq":1,"data":{"map":"dust"}}
+{"eventId":"f10-e02","timestamp":"2026-10-01T15:00:01Z","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-f10","playerId":"p1","type":"PLAYER_JOINED","seq":2,"data":{}}
+{"eventId":"f10-e03","timestamp":"2026-10-01T15:00:01Z","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-f10","playerId":"p2","type":"PLAYER_JOINED","seq":3,"data":{}}
+{"eventId":"f10-e04","timestamp":"2026-10-01T15:00:05Z","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-f10","playerId":"p1","type":"ATTACK","seq":4,"data":{"targetPlayerId":"p2","weapon":"rifle","hit":true,"damage":50}}
+{"eventId":"f10-e05","timestamp":"2026-10-01T15:00:06Z","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-f10","playerId":"p1","type":"ATTACK","seq":5,"data":{"targetPlayerId":"p2","weapon":"rifle","hit":true,"damage":50}}
+{"eventId":"f10-e06","timestamp":"2026-10-01T15:00:06Z","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-f10","playerId":"p1","type":"ELIMINATION","seq":6,"data":{"victimPlayerId":"p2","weapon":"rifle"}}
+{"eventId":"f10-e07","timestamp":"2026-10-01T15:00:30Z","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-f10","type":"MATCH_FINISHED","seq":7,"data":{"reason":"COMPLETED"}}

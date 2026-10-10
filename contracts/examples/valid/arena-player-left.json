@@ -1,0 +1,13 @@
+{
+  "eventId": "ex1-e07",
+  "timestamp": "2026-10-01T15:01:00Z",
+  "gameId": "arena-combat",
+  "gameVersion": "1.0",
+  "matchId": "match-ex1",
+  "playerId": "p2",
+  "type": "PLAYER_LEFT",
+  "seq": 7,
+  "data": {
+    "reason": "DISCONNECT"
+  }
+}

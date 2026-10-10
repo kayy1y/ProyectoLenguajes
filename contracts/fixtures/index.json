@@ -1,0 +1,50 @@
+{
+  "F01-arena-normal": {
+    "file": "F01-arena-normal.jsonl",
+    "gameId": "arena-combat",
+    "matchId": "match-a1",
+    "events": 18,
+    "expected": "../expected/F01-arena-normal.result.json",
+    "description": "Partida normal de 3 jugadores; p1 hace racha de 3."
+  },
+  "F06-arena-out-of-order": {
+    "file": "F06-arena-out-of-order.jsonl",
+    "gameId": "arena-combat",
+    "matchId": "match-f06",
+    "events": 18,
+    "expected": "../expected/F06-arena-out-of-order.result.json",
+    "description": "Mismos eventos que F01 llegando desordenados (e02 antes de e01, e10 después de e13, e17 después de MATCH_FINISHED dentro del período de gracia). El resultado debe ser idéntico a F01."
+  },
+  "F10-arena-zero-denominator": {
+    "file": "F10-arena-zero-denominator.jsonl",
+    "gameId": "arena-combat",
+    "matchId": "match-f10",
+    "events": 7,
+    "expected": "../expected/F10-arena-zero-denominator.result.json",
+    "description": "p2 nunca ataca: accuracy y killEfficiency deben ser null."
+  },
+  "F11-arena-streak-positive": {
+    "file": "F11-arena-streak-positive.jsonl",
+    "gameId": "arena-combat",
+    "matchId": "match-f11",
+    "events": 20,
+    "expected": "../expected/F11-arena-streak-positive.result.json",
+    "description": "p1 encadena 4 eliminaciones (una racha de longitud 4) y p3 encadena 3."
+  },
+  "F12-arena-streak-negative": {
+    "file": "F12-arena-streak-negative.jsonl",
+    "gameId": "arena-combat",
+    "matchId": "match-f12",
+    "events": 17,
+    "expected": "../expected/F12-arena-streak-negative.result.json",
+    "description": "p1 hace 3 eliminaciones pero muere entre la 2ª y la 3ª: no hay racha."
+  },
+  "F13-arena-contradictions": {
+    "file": "F13-arena-contradictions.jsonl",
+    "gameId": "arena-combat",
+    "matchId": "match-f13",
+    "events": 10,
+    "expected": "../expected/F13-arena-contradictions.result.json",
+    "description": "Víctima inexistente, auto-eliminación, auto-ataque y jugador no unido: warnings y exclusión."
+  }
+}

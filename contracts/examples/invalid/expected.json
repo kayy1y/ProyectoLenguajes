@@ -1,0 +1,70 @@
+{
+  "bad-data-type.json": {
+    "code": "INVALID_TYPE",
+    "field": "/data/damage"
+  },
+  "bad-timestamp.json": {
+    "code": "INVALID_FORMAT",
+    "field": "/timestamp"
+  },
+  "data-not-object.json": {
+    "code": "INVALID_TYPE",
+    "field": "/data"
+  },
+  "extra-data-field.json": {
+    "code": "UNKNOWN_FIELD",
+    "field": "/data/kills"
+  },
+  "global-event-with-player.json": {
+    "code": "FORBIDDEN_FIELD",
+    "field": "/playerId"
+  },
+  "impossible-date.json": {
+    "code": "INVALID_FORMAT",
+    "field": "/timestamp"
+  },
+  "miss-with-damage.json": {
+    "code": "INVALID_VALUE",
+    "field": "/data/damage"
+  },
+  "missing-data-field.json": {
+    "code": "REQUIRED_FIELD",
+    "field": "/data/victimPlayerId"
+  },
+  "missing-event-id.json": {
+    "code": "REQUIRED_FIELD",
+    "field": "/eventId"
+  },
+  "negative-damage.json": {
+    "code": "OUT_OF_RANGE",
+    "field": "/data/damage"
+  },
+  "non-utc-timestamp.json": {
+    "code": "INVALID_FORMAT",
+    "field": "/timestamp"
+  },
+  "not-json.txt": {
+    "code": "MALFORMED_JSON",
+    "field": ""
+  },
+  "player-event-without-player.json": {
+    "code": "REQUIRED_FIELD",
+    "field": "/playerId"
+  },
+  "producer-ingest-field.json": {
+    "code": "UNKNOWN_FIELD",
+    "field": "/ingest"
+  },
+  "unknown-game.json": {
+    "code": "UNKNOWN_GAME",
+    "field": "/gameId"
+  },
+  "unknown-type.json": {
+    "code": "UNKNOWN_EVENT_TYPE",
+    "field": "/type"
+  },
+  "unsupported-version.json": {
+    "code": "UNSUPPORTED_GAME_VERSION",
+    "field": "/gameVersion"
+  }
+}

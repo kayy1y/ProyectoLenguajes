@@ -1,0 +1,112 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "arena-combat events v1",
+  "description": "Deathmatch todos contra todos con reaparición. Extiende el sobre común con el catálogo y la carga de cada tipo.",
+  "allOf": [
+    { "$ref": "../event.v1.schema.json" },
+    {
+      "properties": {
+        "gameId": { "const": "arena-combat" },
+        "gameVersion": { "enum": ["1.0"] },
+        "type": {
+          "enum": [
+            "MATCH_STARTED",
+            "PLAYER_JOINED",
+            "ATTACK",
+            "ELIMINATION",
+            "OBJECTIVE_CAPTURED",
+            "PLAYER_LEFT",
+            "MATCH_FINISHED"
+          ]
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "MATCH_STARTED" } }, "required": ["type"] },
+      "then": {
+        "properties": { "playerId": { "$ref": "../event.v1.schema.json#/$defs/Forbidden" }, "data": { "$ref": "#/$defs/MatchStartedData" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "MATCH_FINISHED" } }, "required": ["type"] },
+      "then": {
+        "properties": { "playerId": { "$ref": "../event.v1.schema.json#/$defs/Forbidden" }, "data": { "$ref": "../event.v1.schema.json#/$defs/MatchFinishedData" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "PLAYER_JOINED" } }, "required": ["type"] },
+      "then": {
+        "required": ["playerId"],
+        "properties": { "data": { "$ref": "../event.v1.schema.json#/$defs/EmptyData" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "PLAYER_LEFT" } }, "required": ["type"] },
+      "then": {
+        "required": ["playerId"],
+        "properties": { "data": { "$ref": "../event.v1.schema.json#/$defs/PlayerLeftData" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "ATTACK" } }, "required": ["type"] },
+      "then": {
+        "required": ["playerId"],
+        "properties": { "data": { "$ref": "#/$defs/AttackData" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "ELIMINATION" } }, "required": ["type"] },
+      "then": {
+        "required": ["playerId"],
+        "properties": { "data": { "$ref": "#/$defs/EliminationData" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "OBJECTIVE_CAPTURED" } }, "required": ["type"] },
+      "then": {
+        "required": ["playerId"],
+        "properties": { "data": { "$ref": "#/$defs/ObjectiveCapturedData" } }
+      }
+    }
+  ],
+  "$defs": {
+    "MatchStartedData": {
+      "type": "object",
+      "required": ["map"],
+      "additionalProperties": false,
+      "properties": {
+        "map": { "type": "string", "minLength": 1, "maxLength": 64 }
+      }
+    },
+    "AttackData": {
+      "type": "object",
+      "required": ["targetPlayerId", "weapon", "hit", "damage"],
+      "additionalProperties": false,
+      "properties": {
+        "targetPlayerId": { "$ref": "../event.v1.schema.json#/$defs/PlayerId" },
+        "weapon": { "type": "string", "minLength": 1, "maxLength": 32 },
+        "hit": { "type": "boolean" },
+        "damage": { "type": "integer", "minimum": 0, "maximum": 1000 }
+      },
+      "if": { "properties": { "hit": { "const": false } }, "required": ["hit"] },
+      "then": { "properties": { "damage": { "const": 0 } } }
+    },
+    "EliminationData": {
+      "type": "object",
+      "required": ["victimPlayerId", "weapon"],
+      "additionalProperties": false,
+      "properties": {
+        "victimPlayerId": { "$ref": "../event.v1.schema.json#/$defs/PlayerId" },
+        "weapon": { "type": "string", "minLength": 1, "maxLength": 32 }
+      }
+    },
+    "ObjectiveCapturedData": {
+      "type": "object",
+      "required": ["objectiveId"],
+      "additionalProperties": false,
+      "properties": {
+        "objectiveId": { "type": "string", "minLength": 1, "maxLength": 64 }
+      }
+    }
+  }
+}

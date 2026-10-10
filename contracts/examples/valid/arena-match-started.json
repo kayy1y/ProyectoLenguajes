@@ -1,0 +1,12 @@
+{
+  "eventId": "ex1-e01",
+  "timestamp": "2026-10-01T15:00:00Z",
+  "gameId": "arena-combat",
+  "gameVersion": "1.0",
+  "matchId": "match-ex1",
+  "type": "MATCH_STARTED",
+  "seq": 1,
+  "data": {
+    "map": "dust"
+  }
+}

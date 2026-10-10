@@ -1,0 +1,76 @@
+{
+  "resultVersion": "1",
+  "gameId": "arena-combat",
+  "gameVersion": "1.0",
+  "matchId": "match-a1",
+  "completeness": "COMPLETE",
+  "input": {
+    "eventsReceived": 18,
+    "eventsUsed": 18,
+    "eventsIgnored": 0
+  },
+  "matchStats": {
+    "durationSeconds": 120,
+    "participants": 3,
+    "totalEvents": 18,
+    "metrics": {
+      "totalEliminations": 4,
+      "totalDamage": 430,
+      "eliminationsPerMinute": 2.0,
+      "topPlayerId": "p1"
+    }
+  },
+  "playerStats": [
+    {
+      "playerId": "p1",
+      "metrics": {
+        "attacks": 5,
+        "hits": 4,
+        "accuracy": 0.8,
+        "damageDealt": 300,
+        "eliminations": 3,
+        "deaths": 1,
+        "objectivesCaptured": 0,
+        "killEfficiency": 0.6
+      }
+    },
+    {
+      "playerId": "p2",
+      "metrics": {
+        "attacks": 2,
+        "hits": 1,
+        "accuracy": 0.5,
+        "damageDealt": 100,
+        "eliminations": 1,
+        "deaths": 2,
+        "objectivesCaptured": 1,
+        "killEfficiency": 0.5
+      }
+    },
+    {
+      "playerId": "p3",
+      "metrics": {
+        "attacks": 1,
+        "hits": 1,
+        "accuracy": 1.0,
+        "damageDealt": 30,
+        "eliminations": 0,
+        "deaths": 1,
+        "objectivesCaptured": 0,
+        "killEfficiency": 0.0
+      }
+    }
+  ],
+  "patterns": [
+    {
+      "type": "KILL_STREAK",
+      "playerId": "p1",
+      "fromEventId": "a1-e07",
+      "toEventId": "a1-e13",
+      "from": "2026-10-01T15:00:12Z",
+      "to": "2026-10-01T15:00:40Z",
+      "length": 3
+    }
+  ],
+  "warnings": []
+}
