@@ -5,7 +5,7 @@
 | Go `ingestion-go` (unitarias y de sistema, con `-race`) | 19 | `cd ingestion-go && go test -race ./...` | `internal/*/*_test.go` |
 | Go `simulator` | 3 | `cd simulator && go test -race ./...` | `internal/scenario` |
 | Scala (golden, propiedades, unitarias, HTTP) | 42 | `cd analytics-scala && sbt test` | `src/test/scala/gamestats` |
-| End-to-end sobre Docker Compose | 27 comprobaciones | `make e2e` o `./tests/e2e/e2e.sh` | `tests/e2e/e2e.sh` |
+| End-to-end sobre Docker Compose | 23 comprobaciones | `make e2e` o `./tests/e2e/e2e.sh` | `tests/e2e/e2e.sh` |
 
 `make test` corre las suites de Go y Scala. CI (`.github/workflows/ci.yml`) corre todo lo anterior en cada push y PR.
 

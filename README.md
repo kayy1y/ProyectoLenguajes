@@ -32,7 +32,7 @@ make up        # docker compose up -d --build --wait
 make demo      # escenario demo: 5 partidas de 2 juegos en paralelo y casos especiales
 make results   # resultado de match-a1
 ./scripts/demo.sh   # demo guiada paso a paso
-make e2e       # prueba de punta a punta (27 comprobaciones)
+make e2e       # prueba de punta a punta (23 comprobaciones)
 make down
 ```
 
