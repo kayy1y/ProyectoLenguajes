@@ -27,7 +27,7 @@ down:
 	docker compose down
 
 demo:
-	docker compose --profile demo run --rm simulator --fixture F01-arena-normal
+	docker compose --profile demo run --rm simulator --scenario demo --seed 42
 
 e2e:
 	./tests/e2e/e2e.sh

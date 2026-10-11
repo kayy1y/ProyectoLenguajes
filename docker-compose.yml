@@ -5,37 +5,51 @@ services:
     build:
       context: .
       dockerfile: analytics-scala/Dockerfile
+    image: ${IMAGE_PREFIX:-gamestats}-analytics:${IMAGE_TAG:-latest}
     environment:
       HTTP_PORT: "8081"
       JAVA_OPTS: ${JAVA_OPTS:--XX:MaxRAMPercentage=75}
     expose:
       - "8081"
     networks: [gamestats-net]
+    restart: unless-stopped
 
   ingestion:
     build:
       context: .
       dockerfile: ingestion-go/Dockerfile
+    image: ${IMAGE_PREFIX:-gamestats}-ingestion:${IMAGE_TAG:-latest}
     environment:
       HTTP_ADDR: ":8080"
       ANALYTICS_URL: http://analytics:8081
+      SCHEMAS_DIR: /app/contracts/schemas
+      RESULTS_DIR: ${RESULTS_DIR:-/data}
       ANALYZER_WORKERS: ${ANALYZER_WORKERS:-4}
       ANALYZE_TIMEOUT: ${ANALYZE_TIMEOUT:-5s}
+      ANALYZE_MAX_RETRIES: ${ANALYZE_MAX_RETRIES:-3}
+      MATCH_GRACE_PERIOD: ${MATCH_GRACE_PERIOD:-2s}
+      MATCH_IDLE_TIMEOUT: ${MATCH_IDLE_TIMEOUT:-15s}
+      INGEST_API_KEY: ${INGEST_API_KEY:-}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
-      - "8080:8080"
+      - "${INGEST_PORT:-8080}:8080"
+    volumes:
+      - gamestats-data:/data
     depends_on:
       analytics:
         condition: service_healthy
     networks: [gamestats-net]
+    restart: unless-stopped
 
   simulator:
     build:
       context: .
       dockerfile: simulator/Dockerfile
+    image: ${IMAGE_PREFIX:-gamestats}-simulator:${IMAGE_TAG:-latest}
     profiles: [demo]
     environment:
       TARGET_URL: http://ingestion:8080
+      INGEST_API_KEY: ${INGEST_API_KEY:-}
     depends_on:
       ingestion:
         condition: service_healthy
@@ -43,3 +57,6 @@ services:
 
 networks:
   gamestats-net: {}
+
+volumes:
+  gamestats-data: {}
