@@ -1,0 +1,43 @@
+# Compose de producción: usa las imágenes publicadas en GHCR (no compila nada).
+# En el servidor: copiar este archivo como ~/gamestats/docker-compose.deploy.yml
+# junto a un .env (ver deploy/.env.deploy.example) y ejecutar:
+#   docker compose -f docker-compose.deploy.yml up -d --wait
+name: gamestats
+
+services:
+  analytics:
+    image: ghcr.io/${GHCR_OWNER:?definir GHCR_OWNER}/gamestats-analytics:${IMAGE_TAG:-latest}
+    environment:
+      HTTP_PORT: "8081"
+      JAVA_OPTS: ${JAVA_OPTS:--Xmx256m}
+    expose:
+      - "8081" # solo red interna: no se publica fuera del servidor
+    networks: [gamestats-net]
+    restart: unless-stopped
+
+  ingestion:
+    image: ghcr.io/${GHCR_OWNER:?definir GHCR_OWNER}/gamestats-ingestion:${IMAGE_TAG:-latest}
+    environment:
+      HTTP_ADDR: ":8080"
+      ANALYTICS_URL: http://analytics:8081
+      SCHEMAS_DIR: /app/contracts/schemas
+      RESULTS_DIR: /data
+      MATCH_GRACE_PERIOD: ${MATCH_GRACE_PERIOD:-2s}
+      MATCH_IDLE_TIMEOUT: ${MATCH_IDLE_TIMEOUT:-30s}
+      INGEST_API_KEY: ${INGEST_API_KEY:?definir INGEST_API_KEY en .env}
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+    ports:
+      - "8080:8080"
+    volumes:
+      - gamestats-data:/data
+    depends_on:
+      analytics:
+        condition: service_healthy
+    networks: [gamestats-net]
+    restart: unless-stopped
+
+networks:
+  gamestats-net: {}
+
+volumes:
+  gamestats-data: {}

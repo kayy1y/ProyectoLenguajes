@@ -1,10 +1,12 @@
 # Contexto de build: raíz del repositorio (necesita contracts/).
-FROM golang:1.26-alpine AS build
+# Compila en la plataforma del runner y cruza a la de destino (multi-arch sin emulación).
+FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS build
+ARG TARGETOS TARGETARCH
 WORKDIR /src/ingestion-go
 COPY ingestion-go/go.mod ingestion-go/go.sum ./
 RUN go mod download
 COPY ingestion-go/ ./
-RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/ingestion ./cmd/ingestion && mkdir -p /out/data
+RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags="-s -w" -o /out/ingestion ./cmd/ingestion && mkdir -p /out/data
 
 FROM gcr.io/distroless/static-debian12:nonroot
 WORKDIR /app

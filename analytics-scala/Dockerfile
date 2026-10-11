@@ -1,5 +1,6 @@
 # Contexto de build: raíz del repositorio.
-FROM eclipse-temurin:21-jdk AS build
+# El jar es independiente de la arquitectura: se compila una vez en la plataforma del runner.
+FROM --platform=$BUILDPLATFORM eclipse-temurin:21-jdk AS build
 ARG SBT_VERSION=1.13.0
 ADD https://github.com/sbt/sbt/releases/download/v${SBT_VERSION}/sbt-${SBT_VERSION}.tgz /tmp/sbt.tgz
 RUN tar -xzf /tmp/sbt.tgz -C /opt && rm /tmp/sbt.tgz
