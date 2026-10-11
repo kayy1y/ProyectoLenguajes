@@ -1,6 +1,6 @@
 # Protocolo entre componentes v1
 
-> Estado: **borrador de la fase 1**. Este documento debe coincidir con lo implementado; cualquier cambio de contrato actualiza a la vez los esquemas, los ejemplos, los fixtures y este archivo.
+> Este documento coincide con lo implementado en `ingestion-go/internal/httpapi` y `analytics-scala/.../Main.scala`. Cualquier cambio de contrato actualiza a la vez los esquemas, los ejemplos, los fixtures y este archivo.
 
 ```
 simulator / productor ──POST /v1/events──▶ ingestion-go :8080 ──POST /v1/analyze──▶ analytics-scala :8081 (solo red interna)
@@ -27,7 +27,20 @@ Respuesta de `GET …/results` cuando la partida está analizada:
 ```
 `result` es el cuerpo que devuelve Scala, **sin modificar**: Go lo guarda como bytes opacos y no calcula nada.
 
-Estados de una partida: `COLLECTING`, `FINISHING`, `EXPIRED`, `ANALYZING`, `RETRYING`, `ANALYZED`, `FAILED`.
+Estados de una partida (`status`):
+
+| Estado | Significado |
+|---|---|
+| `COLLECTING` | Recibiendo eventos |
+| `FINISHING` | Llegó `MATCH_FINISHED`; corre el período de gracia |
+| `ANALYZING` | Lote enviado a Scala (primer intento) |
+| `RETRYING` | Reintentando tras un error transitorio |
+| `ANALYZED` | Resultado disponible |
+| `FAILED` | Se agotaron los reintentos o hubo un error de contrato; admite `reanalyze` |
+
+Cada registro incluye además `eventCount`, `completeness`, `closedReason` (`MATCH_FINISHED`, `IDLE_TIMEOUT` o `SHUTDOWN`), `attempts`, `lastError`, `updatedAt` y `analyzedAt`.
+
+**Autenticación:** si `INGEST_API_KEY` está definida, `POST /v1/events` y `POST …/reanalyze` exigen la cabecera `X-API-Key` (sin ella responden `401 UNAUTHORIZED`). Las rutas `GET` son públicas.
 
 ## 2. Go → Scala: `POST /v1/analyze`
 
