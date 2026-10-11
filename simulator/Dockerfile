@@ -10,5 +10,6 @@ FROM gcr.io/distroless/static-debian12:nonroot
 WORKDIR /app
 COPY --from=build /out/simulator /app/simulator
 COPY contracts/fixtures /app/contracts/fixtures
+COPY contracts/expected /app/contracts/expected
 ENV FIXTURES_DIR=/app/contracts/fixtures
 ENTRYPOINT ["/app/simulator"]
