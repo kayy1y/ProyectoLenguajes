@@ -1,0 +1,15 @@
+{
+  "eventId": "rex-e01",
+  "timestamp": "2026-10-01T16:01:03Z",
+  "gameId": "street-racing",
+  "gameVersion": "1.0",
+  "matchId": "race-ex",
+  "playerId": "d3",
+  "type": "LAP_COMPLETED",
+  "seq": 1,
+  "data": {
+    "lapNumber": 1,
+    "lapTimeMs": 62000,
+    "valid": true
+  }
+}

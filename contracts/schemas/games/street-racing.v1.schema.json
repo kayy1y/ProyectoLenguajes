@@ -1,0 +1,104 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "street-racing events v1",
+  "description": "Carrera por vueltas. Extiende el sobre común con el catálogo y la carga de cada tipo.",
+  "allOf": [
+    { "$ref": "../event.v1.schema.json" },
+    {
+      "properties": {
+        "gameId": { "const": "street-racing" },
+        "gameVersion": { "enum": ["1.0"] },
+        "type": {
+          "enum": [
+            "MATCH_STARTED",
+            "PLAYER_JOINED",
+            "LAP_COMPLETED",
+            "POSITION_CHANGED",
+            "PLAYER_FINISHED",
+            "PLAYER_LEFT",
+            "MATCH_FINISHED"
+          ]
+        }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "MATCH_STARTED" } }, "required": ["type"] },
+      "then": {
+        "properties": { "playerId": { "$ref": "../event.v1.schema.json#/$defs/Forbidden" }, "data": { "$ref": "#/$defs/MatchStartedData" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "MATCH_FINISHED" } }, "required": ["type"] },
+      "then": {
+        "properties": { "playerId": { "$ref": "../event.v1.schema.json#/$defs/Forbidden" }, "data": { "$ref": "../event.v1.schema.json#/$defs/MatchFinishedData" } }
+      }
+    },
+    {
+      "if": { "properties": { "type": { "const": "PLAYER_JOINED" } }, "required": ["type"] },
+      "then": { "required": ["playerId"], "properties": { "data": { "$ref": "#/$defs/PlayerJoinedData" } } }
+    },
+    {
+      "if": { "properties": { "type": { "const": "PLAYER_LEFT" } }, "required": ["type"] },
+      "then": { "required": ["playerId"], "properties": { "data": { "$ref": "../event.v1.schema.json#/$defs/PlayerLeftData" } } }
+    },
+    {
+      "if": { "properties": { "type": { "const": "LAP_COMPLETED" } }, "required": ["type"] },
+      "then": { "required": ["playerId"], "properties": { "data": { "$ref": "#/$defs/LapCompletedData" } } }
+    },
+    {
+      "if": { "properties": { "type": { "const": "POSITION_CHANGED" } }, "required": ["type"] },
+      "then": { "required": ["playerId"], "properties": { "data": { "$ref": "#/$defs/PositionChangedData" } } }
+    },
+    {
+      "if": { "properties": { "type": { "const": "PLAYER_FINISHED" } }, "required": ["type"] },
+      "then": { "required": ["playerId"], "properties": { "data": { "$ref": "#/$defs/PlayerFinishedData" } } }
+    }
+  ],
+  "$defs": {
+    "MatchStartedData": {
+      "type": "object",
+      "required": ["track", "totalLaps"],
+      "additionalProperties": false,
+      "properties": {
+        "track": { "type": "string", "minLength": 1, "maxLength": 64 },
+        "totalLaps": { "type": "integer", "minimum": 1, "maximum": 200 }
+      }
+    },
+    "PlayerJoinedData": {
+      "type": "object",
+      "required": ["gridPosition"],
+      "additionalProperties": false,
+      "properties": {
+        "gridPosition": { "type": "integer", "minimum": 1, "maximum": 100 }
+      }
+    },
+    "LapCompletedData": {
+      "type": "object",
+      "required": ["lapNumber", "lapTimeMs", "valid"],
+      "additionalProperties": false,
+      "properties": {
+        "lapNumber": { "type": "integer", "minimum": 1 },
+        "lapTimeMs": { "type": "integer", "minimum": 1 },
+        "valid": { "type": "boolean" }
+      }
+    },
+    "PositionChangedData": {
+      "type": "object",
+      "required": ["position", "lapNumber"],
+      "additionalProperties": false,
+      "properties": {
+        "position": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "lapNumber": { "type": "integer", "minimum": 1 }
+      }
+    },
+    "PlayerFinishedData": {
+      "type": "object",
+      "required": ["finalPosition", "totalTimeMs"],
+      "additionalProperties": false,
+      "properties": {
+        "finalPosition": { "type": "integer", "minimum": 1, "maximum": 100 },
+        "totalTimeMs": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

@@ -64,3 +64,21 @@ class EdgeCaseSpec extends munit.FunSuite:
     assertEquals(res.status, 200)
     assertEquals(ujson.read(res.body), Fixtures.expected("F01-arena-normal"))
   }
+
+class RacingSpec extends munit.FunSuite:
+  private val f17 = Fixtures.events("F17-racing-comeback")
+
+  test("ganar sin haber estado 3º o peor no es COMEBACK aunque se gane") {
+    val noComeback = f17.filterNot(e => e.playerId.contains("d3") && e.`type` == "PLAYER_JOINED")
+      .map(e => if e.eventId == "r1-e08" then e.copy(data = ujson.Obj("position" -> 2, "lapNumber" -> 1)) else e)
+    val r = gamestats.core.Analysis.analyze(Fixtures.request(noComeback)).toOption.get
+    assertEquals(r.patterns, Nil)
+  }
+
+  test("la remontada debe ocurrir antes de la llegada: bajar después no cuenta") {
+    val afterFinish = f17.find(_.eventId == "r1-e07").get
+      .copy(eventId = "r1-late", timestamp = "2026-10-01T16:03:05Z", seq = Some(99), data = ujson.Obj("position" -> 5, "lapNumber" -> 3))
+    val withoutGrid = f17.map(e => if e.eventId == "r1-e04" then e.copy(data = ujson.Obj("gridPosition" -> 1)) else e)
+    val r = gamestats.core.Analysis.analyze(Fixtures.request(withoutGrid :+ afterFinish)).toOption.get
+    assertEquals(r.patterns.map(_("type").str), Nil)
+  }

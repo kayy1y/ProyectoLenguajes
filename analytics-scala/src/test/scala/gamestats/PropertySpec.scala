@@ -21,11 +21,17 @@ class PropertySpec extends munit.FunSuite:
     test(s"$name: invariantes de sumas") {
       val r = Analysis.analyze(Fixtures.request(name)).toOption.get
       def sum(metric: String) = r.playerStats.map(_.metrics(metric).num).sum
-      val total = r.matchStats.metrics("totalEliminations").num
-      assertEquals(sum("eliminations"), total)
-      assertEquals(sum("deaths"), total)
-      assertEquals(sum("damageDealt"), r.matchStats.metrics("totalDamage").num)
+      def matchNum(metric: String) = r.matchStats.metrics(metric).num
       assertEquals(r.input.eventsUsed + r.input.eventsIgnored, r.input.eventsReceived)
       assertEquals(r.input.eventsIgnored, r.warnings.size)
+      r.gameId match
+        case "arena-combat" =>
+          assertEquals(sum("eliminations"), matchNum("totalEliminations"))
+          assertEquals(sum("deaths"), matchNum("totalEliminations"))
+          assertEquals(sum("damageDealt"), matchNum("totalDamage"))
+        case "street-racing" =>
+          assertEquals(matchNum("finishers") + matchNum("dnf"), r.matchStats.participants.toDouble)
+          assertEquals(r.playerStats.count(!_.metrics("finalPosition").isNull).toDouble, matchNum("finishers"))
+        case other => fail(s"sin invariantes para $other")
     }
   }

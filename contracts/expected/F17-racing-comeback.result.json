@@ -1,0 +1,74 @@
+{
+  "resultVersion": "1",
+  "gameId": "street-racing",
+  "gameVersion": "1.0",
+  "matchId": "race-r1",
+  "completeness": "COMPLETE",
+  "input": {
+    "eventsReceived": 21,
+    "eventsUsed": 21,
+    "eventsIgnored": 0
+  },
+  "matchStats": {
+    "durationSeconds": 190,
+    "participants": 3,
+    "totalEvents": 21,
+    "metrics": {
+      "finishers": 3,
+      "dnf": 0,
+      "fastestLapMs": 60000,
+      "fastestLapPlayerId": "d3",
+      "winnerPlayerId": "d3"
+    }
+  },
+  "playerStats": [
+    {
+      "playerId": "d1",
+      "metrics": {
+        "validLaps": 3,
+        "invalidLaps": 0,
+        "bestValidLapMs": 61000,
+        "avgValidLapMs": 61166.6667,
+        "gridPosition": 1,
+        "finalPosition": 2,
+        "positionsGained": -1
+      }
+    },
+    {
+      "playerId": "d2",
+      "metrics": {
+        "validLaps": 2,
+        "invalidLaps": 1,
+        "bestValidLapMs": 62000,
+        "avgValidLapMs": 62250,
+        "gridPosition": 2,
+        "finalPosition": 3,
+        "positionsGained": -1
+      }
+    },
+    {
+      "playerId": "d3",
+      "metrics": {
+        "validLaps": 2,
+        "invalidLaps": 1,
+        "bestValidLapMs": 60000,
+        "avgValidLapMs": 61000,
+        "gridPosition": 3,
+        "finalPosition": 1,
+        "positionsGained": 2
+      }
+    }
+  ],
+  "patterns": [
+    {
+      "type": "COMEBACK",
+      "playerId": "d3",
+      "fromEventId": "r1-e04",
+      "toEventId": "r1-e16",
+      "from": "2026-10-01T16:00:01Z",
+      "to": "2026-10-01T16:03:01Z",
+      "worstPosition": 3
+    }
+  ],
+  "warnings": []
+}

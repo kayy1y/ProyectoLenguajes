@@ -1,0 +1,13 @@
+{
+  "eventId": "rex-e01",
+  "timestamp": "2026-10-01T16:00:01Z",
+  "gameId": "street-racing",
+  "gameVersion": "1.0",
+  "matchId": "race-ex",
+  "playerId": "d1",
+  "type": "PLAYER_JOINED",
+  "seq": 1,
+  "data": {
+    "gridPosition": 1
+  }
+}

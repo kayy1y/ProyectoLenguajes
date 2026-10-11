@@ -105,4 +105,38 @@ Hay un registro por cada jugador que hizo `PLAYER_JOINED`.
 | F12 arena-streak-negative | Una muerte interrumpe la racha | `patterns: []` aunque p1 tenga 3 eliminaciones |
 | F13 arena-contradictions | Reglas semánticas | 4 warnings; se usan 6 de 10 eventos |
 
-Las métricas de `street-racing` se documentarán en la fase 8.
+| F17 racing-comeback | Remontada | d3 sale 3º y gana → `COMEBACK` (`worstPosition` 3) |
+| F18 racing-no-comeback | Ganar sin remontada y abandono | `patterns: []`; e3 sin vueltas → métricas `null`; `dnf` = 1 |
+
+## 8. Carreras (`street-racing`)
+
+### Por jugador
+| Métrica | Eventos · campos | Fórmula | Límite |
+|---|---|---|---|
+| `validLaps` / `invalidLaps` | `LAP_COMPLETED.valid` | `partition(_.valid)` y tamaño de cada parte | — |
+| `bestValidLapMs` | `LAP_COMPLETED.lapTimeMs` válidas | `minOption` | `null` sin vueltas válidas |
+| `avgValidLapMs` | ídem | `safeRatio(suma, cantidad)` | `null` sin vueltas válidas |
+| `gridPosition` | `PLAYER_JOINED.data.gridPosition` | lectura directa | `null` si falta |
+| `finalPosition` | `PLAYER_FINISHED.finalPosition` | lectura directa | `null` si no terminó (DNF) |
+| **`positionsGained`** (combinada) | `PLAYER_JOINED` × `PLAYER_FINISHED` | `gridPosition − finalPosition` | `null` si falta alguno de los dos |
+
+### Por partida
+`durationSeconds` y `participants` (del núcleo), `finishers` (jugadores con `PLAYER_FINISHED`), `dnf` = `participants − finishers`, `fastestLapMs` y `fastestLapPlayerId` (mínimo entre las vueltas válidas; desempate por `playerId`), `winnerPlayerId` (`finalPosition = 1`).
+
+### Patrón secuencial `COMEBACK`
+- **Trayectoria del jugador:** `gridPosition` seguida de cada `POSITION_CHANGED.position`, en el orden total.
+- **Regla:** hay `COMEBACK` si, **antes** de su `PLAYER_FINISHED` con `finalPosition = 1`, la trayectoria alcanzó la posición 3 o peor. `from` es el primer evento con la peor posición y `to` es la llegada.
+- **No es un conteo:** ganar desde la pole (F18), o bajar posiciones *después* de llegar, no cuenta.
+
+### F17 calculado a mano (`race-r1`, 3 vueltas)
+| Piloto | Vueltas (ms) | válidas / inválidas | mejor | promedio válidas | salida → llegada | ganadas |
+|---|---|---|---|---|---|---|
+| d1 | 61000, 61500, 61000 | 3 / 0 | 61000 | 183500/3 = 61166.6667 | 1 → 2 | −1 |
+| d2 | 62500, 63000✗, 62000 | 2 / 1 | 62000 | 62250 | 2 → 3 | −1 |
+| d3 | 62000, 60000, 58000✗ | 2 / 1 | 60000 | 61000 | 3 → 1 | +2 |
+
+- **Partida:** `durationSeconds` = 190 · `finishers` = 3 · `dnf` = 0 · `fastestLapMs` = 60000 (d3; los 58000 de d3 no cuentan porque esa vuelta es inválida) · `winnerPlayerId` = d3.
+- **Patrón:** `COMEBACK` de d3, desde r1-e04 (sale 3º) hasta r1-e16 (llega 1º).
+
+### Extensibilidad
+Agregar este juego requirió el esquema `games/street-racing.v1.schema.json`, `games/racing/RacingAnalyzer.scala`, una línea en `core/Registry.scala`, fixtures y documentación. Go no cambió: carga el esquema nuevo automáticamente. El único cambio previo en el núcleo (commit aparte) fue conservar el `data` de `MATCH_STARTED` y `PLAYER_JOINED`, para que cada juego lea sus atributos propios.

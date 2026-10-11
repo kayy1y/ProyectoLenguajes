@@ -43,6 +43,20 @@ Deathmatch todos contra todos, con reaparición y sin equipos.
 
 Los eventos describen **hechos**, nunca estadísticas: no se aceptan campos como `kills` o `accuracy`, que se calculan en el análisis.
 
+## 3b. Catálogo `street-racing` v1.0
+
+Carrera por vueltas.
+
+| `type` | `playerId` | `data` |
+|---|---|---|
+| `MATCH_STARTED` | prohibido | `{"track": string(1..64), "totalLaps": int 1..200}` |
+| `PLAYER_JOINED` | piloto | `{"gridPosition": int 1..100}` |
+| `LAP_COMPLETED` | piloto | `{"lapNumber": int ≥ 1, "lapTimeMs": int ≥ 1, "valid": boolean}` |
+| `POSITION_CHANGED` | piloto | `{"position": int 1..100, "lapNumber": int ≥ 1}` (posición nueva) |
+| `PLAYER_FINISHED` | piloto | `{"finalPosition": int 1..100, "totalTimeMs": int ≥ 1}` |
+| `PLAYER_LEFT` | piloto | `{"reason": "DISCONNECT" \| "QUIT"}` (abandono) |
+| `MATCH_FINISHED` | prohibido | `{"reason": "COMPLETED" \| "ABORTED"}` |
+
 ## 4. Ejemplo mínimo
 
 ```json

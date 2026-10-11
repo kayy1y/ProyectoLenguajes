@@ -1,0 +1,64 @@
+{
+  "resultVersion": "1",
+  "gameId": "street-racing",
+  "gameVersion": "1.0",
+  "matchId": "race-r2",
+  "completeness": "COMPLETE",
+  "input": {
+    "eventsReceived": 10,
+    "eventsUsed": 10,
+    "eventsIgnored": 0
+  },
+  "matchStats": {
+    "durationSeconds": 70,
+    "participants": 3,
+    "totalEvents": 10,
+    "metrics": {
+      "finishers": 2,
+      "dnf": 1,
+      "fastestLapMs": 60000,
+      "fastestLapPlayerId": "e1",
+      "winnerPlayerId": "e1"
+    }
+  },
+  "playerStats": [
+    {
+      "playerId": "e1",
+      "metrics": {
+        "validLaps": 1,
+        "invalidLaps": 0,
+        "bestValidLapMs": 60000,
+        "avgValidLapMs": 60000,
+        "gridPosition": 1,
+        "finalPosition": 1,
+        "positionsGained": 0
+      }
+    },
+    {
+      "playerId": "e2",
+      "metrics": {
+        "validLaps": 1,
+        "invalidLaps": 0,
+        "bestValidLapMs": 61000,
+        "avgValidLapMs": 61000,
+        "gridPosition": 2,
+        "finalPosition": 2,
+        "positionsGained": 0
+      }
+    },
+    {
+      "playerId": "e3",
+      "metrics": {
+        "validLaps": 0,
+        "invalidLaps": 0,
+        "bestValidLapMs": null,
+        "avgValidLapMs": null,
+        "gridPosition": 3,
+        "finalPosition": null,
+        "positionsGained": null
+      }
+    }
+  ],
+  "patterns": [],
+  "warnings": []
+}

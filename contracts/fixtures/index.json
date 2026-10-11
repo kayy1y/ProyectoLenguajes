@@ -46,5 +46,21 @@
     "events": 10,
     "expected": "../expected/F13-arena-contradictions.result.json",
     "description": "Víctima inexistente, auto-eliminación, auto-ataque y jugador no unido: warnings y exclusión."
+  },
+  "F17-racing-comeback": {
+    "file": "F17-racing-comeback.jsonl",
+    "gameId": "street-racing",
+    "matchId": "race-r1",
+    "events": 21,
+    "expected": "../expected/F17-racing-comeback.result.json",
+    "description": "d3 sale 3º, adelanta a d2 y a d1 y gana: COMEBACK. Incluye vueltas inválidas."
+  },
+  "F18-racing-no-comeback": {
+    "file": "F18-racing-no-comeback.jsonl",
+    "gameId": "street-racing",
+    "matchId": "race-r2",
+    "events": 10,
+    "expected": "../expected/F18-racing-no-comeback.result.json",
+    "description": "e1 gana desde la pole sin bajar posiciones: sin COMEBACK. e3 abandona (DNF)."
   }
 }

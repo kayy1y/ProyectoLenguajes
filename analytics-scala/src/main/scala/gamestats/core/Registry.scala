@@ -2,11 +2,12 @@ package gamestats.core
 
 import gamestats.domain.AnalysisError
 import gamestats.games.arena.ArenaAnalyzer
+import gamestats.games.racing.RacingAnalyzer
 
 /** Juegos soportados. Agregar un juego = agregar su analizador a esta lista. */
 object Registry:
   val games: Map[String, GameAnalyzer[?]] =
-    List[GameAnalyzer[?]](ArenaAnalyzer).map(g => g.gameId -> g).toMap
+    List[GameAnalyzer[?]](ArenaAnalyzer, RacingAnalyzer).map(g => g.gameId -> g).toMap
 
   def lookup(gameId: String, version: String): Either[AnalysisError, GameAnalyzer[?]] =
     games.get(gameId) match

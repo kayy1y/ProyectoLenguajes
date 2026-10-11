@@ -1,0 +1,10 @@
+{"eventId":"r2-e01","timestamp":"2026-10-01T16:00:00Z","gameId":"street-racing","gameVersion":"1.0","matchId":"race-r2","type":"MATCH_STARTED","seq":1,"data":{"track":"imola","totalLaps":1}}
+{"eventId":"r2-e02","timestamp":"2026-10-01T16:00:01Z","gameId":"street-racing","gameVersion":"1.0","matchId":"race-r2","playerId":"e1","type":"PLAYER_JOINED","seq":2,"data":{"gridPosition":1}}
+{"eventId":"r2-e03","timestamp":"2026-10-01T16:00:01Z","gameId":"street-racing","gameVersion":"1.0","matchId":"race-r2","playerId":"e2","type":"PLAYER_JOINED","seq":3,"data":{"gridPosition":2}}
+{"eventId":"r2-e04","timestamp":"2026-10-01T16:00:01Z","gameId":"street-racing","gameVersion":"1.0","matchId":"race-r2","playerId":"e3","type":"PLAYER_JOINED","seq":4,"data":{"gridPosition":3}}
+{"eventId":"r2-e05","timestamp":"2026-10-01T16:00:30Z","gameId":"street-racing","gameVersion":"1.0","matchId":"race-r2","playerId":"e3","type":"PLAYER_LEFT","seq":5,"data":{"reason":"DISCONNECT"}}
+{"eventId":"r2-e06","timestamp":"2026-10-01T16:01:01Z","gameId":"street-racing","gameVersion":"1.0","matchId":"race-r2","playerId":"e1","type":"LAP_COMPLETED","seq":6,"data":{"lapNumber":1,"lapTimeMs":60000,"valid":true}}
+{"eventId":"r2-e07","timestamp":"2026-10-01T16:01:01Z","gameId":"street-racing","gameVersion":"1.0","matchId":"race-r2","playerId":"e1","type":"PLAYER_FINISHED","seq":7,"data":{"finalPosition":1,"totalTimeMs":60000}}
+{"eventId":"r2-e08","timestamp":"2026-10-01T16:01:02Z","gameId":"street-racing","gameVersion":"1.0","matchId":"race-r2","playerId":"e2","type":"LAP_COMPLETED","seq":8,"data":{"lapNumber":1,"lapTimeMs":61000,"valid":true}}
+{"eventId":"r2-e09","timestamp":"2026-10-01T16:01:02Z","gameId":"street-racing","gameVersion":"1.0","matchId":"race-r2","playerId":"e2","type":"PLAYER_FINISHED","seq":9,"data":{"finalPosition":2,"totalTimeMs":61000}}
+{"eventId":"r2-e10","timestamp":"2026-10-01T16:01:10Z","gameId":"street-racing","gameVersion":"1.0","matchId":"race-r2","type":"MATCH_FINISHED","seq":10,"data":{"reason":"COMPLETED"}}
