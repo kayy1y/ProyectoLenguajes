@@ -50,14 +50,14 @@ func TestInvalidExamplesMatchExpectedCodes(t *testing.T) {
 	for name, want := range expected {
 		body, _ := os.ReadFile(filepath.Join(contracts, "examples/invalid", name))
 		_, errs := r.Parse(body)
-		found := false
-		for _, e := range errs {
-			if e.Code == want.Code && e.Field == want.Field {
-				found = true
-			}
+		// El primer error es el que ve el productor: tiene que ser el motivo real.
+		if len(errs) == 0 || errs[0].Code != want.Code || errs[0].Field != want.Field {
+			t.Errorf("%s: want first error %s at %q, got %+v", name, want.Code, want.Field, errs)
 		}
-		if !found {
-			t.Errorf("%s: want %s at %q, got %+v", name, want.Code, want.Field, errs)
+		for _, e := range errs {
+			if e.Code == "UNKNOWN_FIELD" && envelopeFields[e.Field] {
+				t.Errorf("%s: spurious %+v", name, e)
+			}
 		}
 	}
 }

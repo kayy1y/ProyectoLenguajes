@@ -108,6 +108,13 @@ func (d *Dispatcher) route(flushCtx context.Context, env match.Envelope, wg *syn
 	}
 	ch, ok := d.workers[k]
 	if !ok {
+		// Una partida ya cerrada antes de un reinicio (resultados recargados de
+		// RESULTS_DIR) no se reabre: se rechaza igual que con un tombstone.
+		if rec, exists := d.store.Get(k); exists && rec.Status != store.Collecting && rec.Status != store.Finishing {
+			d.closed[k] = tombstone{code: "MATCH_CLOSED", at: time.Now()}
+			env.Reply <- match.Ack{Status: match.Rejected, Code: "MATCH_CLOSED"}
+			return
+		}
 		ch = make(chan match.Envelope, d.cfg.MatchQueueSize)
 		d.workers[k] = ch
 		w := match.NewWorker(k, d.cfg.Match, ch, d.pool, d.done, d.store, d.log)

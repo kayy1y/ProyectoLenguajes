@@ -35,6 +35,14 @@ const baseURL = "https://gamestats.local/schemas/"
 
 var printer = message.NewPrinter(language.English)
 
+// envelopeFields son los campos del sobre. Si otro campo del sobre es inválido,
+// unevaluatedProperties pierde sus anotaciones y marca también estos campos como
+// desconocidos; esos falsos UNKNOWN_FIELD se descartan.
+var envelopeFields = map[string]bool{
+	"/eventId": true, "/timestamp": true, "/gameId": true, "/gameVersion": true, "/matchId": true,
+	"/playerId": true, "/type": true, "/seq": true, "/data": true,
+}
+
 type Registry struct {
 	envelope *jsonschema.Schema
 	games    map[string]*jsonschema.Schema
@@ -140,6 +148,9 @@ func translate(err error) []FieldError {
 			return
 		}
 		for _, fe := range leaf(v) {
+			if _, isFalse := v.ErrorKind.(*kind.FalseSchema); isFalse && envelopeFields[fe.Field] {
+				continue
+			}
 			if k := fe.Field + "|" + fe.Code; !seen[k] {
 				seen[k] = true
 				out = append(out, fe)

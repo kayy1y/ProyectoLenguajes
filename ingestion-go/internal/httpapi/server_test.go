@@ -513,3 +513,34 @@ func TestShutdownFlushesOpenMatches(t *testing.T) {
 }
 
 func eventKey(game, matchID string) event.Key { return event.Key{GameID: game, MatchID: matchID} }
+
+// Tras un reinicio con RESULTS_DIR, una partida analizada no se reabre.
+func TestRestoredMatchIsNotReopened(t *testing.T) {
+	dir := t.TempDir()
+	st, _ := store.New(dir)
+	k := eventKey("arena-combat", "match-a1")
+	st.SetCollecting(k, store.Collecting, 18)
+	st.SetResult(k, json.RawMessage(`{"resultVersion":"1"}`))
+
+	restored, _ := store.New(dir)
+	log := slog.New(slog.NewTextHandler(io.Discard, nil))
+	validator, _ := validation.Load(filepath.Join(contracts, "schemas"))
+	pool := analysis.NewPool(analysis.PoolConfig{Workers: 1, QueueSize: 1}, analysis.NewClient("http://127.0.0.1:1", time.Second), restored, log)
+	disp := dispatcher.New(dispatcher.Config{QueueSize: 8, MatchQueueSize: 8, TombstoneTTL: time.Hour,
+		Match: match.Config{GracePeriod: time.Second, IdleTimeout: time.Second, MaxEvents: 100}}, pool, restored, log)
+	ctx, cancel := context.WithCancel(context.Background())
+	done := make(chan struct{})
+	go func() { disp.Run(ctx, ctx); close(done) }()
+	defer func() { cancel(); <-done }()
+	api := httptest.NewServer(httpapi.New(httpapi.Deps{Validator: validator, Dispatcher: disp, Pool: pool, Store: restored,
+		Counters: &obs.Counters{}, Rejections: obs.NewRejections(10), EnqueueTimeout: time.Second, Log: log}).Handler())
+	defer api.Close()
+
+	s := &system{api: api, store: restored}
+	if code, body := s.post(t, fixture(t, "F01-arena-normal")[0]); code != http.StatusConflict || body["code"] != "MATCH_CLOSED" {
+		t.Fatalf("got %d %v, want 409 MATCH_CLOSED", code, body)
+	}
+	if rec, _ := restored.Get(k); rec.Status != store.Analyzed || string(rec.Result) != `{"resultVersion":"1"}` {
+		t.Fatalf("restored result was modified: %+v", rec)
+	}
+}
