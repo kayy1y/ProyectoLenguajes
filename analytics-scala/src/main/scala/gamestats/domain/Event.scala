@@ -2,10 +2,14 @@ package gamestats.domain
 
 import java.time.Instant
 
-/** Tipos de ciclo de vida comunes a todos los juegos; el núcleo los entiende sin conocer el juego. */
+/**
+ * Tipos de ciclo de vida comunes a todos los juegos; el núcleo los entiende sin conocer el juego.
+ * MatchStarted y PlayerJoined conservan su `data` para los atributos propios de cada juego
+ * (p. ej. el mapa o la posición de salida), que solo el analizador del juego interpreta.
+ */
 enum Lifecycle:
-  case MatchStarted
-  case PlayerJoined
+  case MatchStarted(data: ujson.Value)
+  case PlayerJoined(data: ujson.Value)
   case PlayerLeft(reason: String)
   case MatchFinished(reason: String)
 

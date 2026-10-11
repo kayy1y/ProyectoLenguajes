@@ -17,8 +17,8 @@ object Analysis:
   def decode[P](game: GameAnalyzer[P])(raw: RawEvent): Either[Warning, Event[P]] =
     def str(field: String) = raw.data.objOpt.flatMap(_.get(field)).flatMap(_.strOpt).getOrElse("")
     val body: Either[(String, String), Either[Lifecycle, P]] = raw.`type` match
-      case "MATCH_STARTED"  => Right(Left(Lifecycle.MatchStarted))
-      case "PLAYER_JOINED"  => Right(Left(Lifecycle.PlayerJoined))
+      case "MATCH_STARTED"  => Right(Left(Lifecycle.MatchStarted(raw.data)))
+      case "PLAYER_JOINED"  => Right(Left(Lifecycle.PlayerJoined(raw.data)))
       case "PLAYER_LEFT"    => Right(Left(Lifecycle.PlayerLeft(str("reason"))))
       case "MATCH_FINISHED" => Right(Left(Lifecycle.MatchFinished(str("reason"))))
       case other            => game.decode(other, raw.data).map(Right(_))
@@ -37,7 +37,7 @@ object Analysis:
       case (acc, Left(w)) => acc.copy(warnings = w :: acc.warnings)
       case (acc, Right(e)) =>
         val rule = e.body match
-          case Left(Lifecycle.PlayerJoined) => None
+          case Left(Lifecycle.PlayerJoined(_)) => None
           case _ =>
             e.player
               .filterNot(acc.joined)
@@ -46,7 +46,9 @@ object Analysis:
         rule match
           case Some((code, msg)) => acc.copy(warnings = Warning(e.id, code, msg) :: acc.warnings)
           case None =>
-            val joined = if e.body == Left(Lifecycle.PlayerJoined) then acc.joined ++ e.player else acc.joined
+            val joined = e.body match
+              case Left(Lifecycle.PlayerJoined(_)) => acc.joined ++ e.player
+              case _                               => acc.joined
             acc.copy(joined = joined, kept = e :: acc.kept)
     }
     (end.kept.reverse, end.warnings.reverse)
@@ -55,9 +57,9 @@ object Analysis:
     def first(l: Lifecycle => Boolean) = events.collectFirst { case Event(_, ts, _, _, Left(x)) if l(x) => ts }
     MatchContext(
       events = events,
-      players = events.collect { case Event(_, _, _, Some(p), Left(Lifecycle.PlayerJoined)) => p }.distinct.sorted,
+      players = events.collect { case Event(_, _, _, Some(p), Left(Lifecycle.PlayerJoined(_))) => p }.distinct.sorted,
       completeness = completeness,
-      start = first(_ == Lifecycle.MatchStarted),
+      start = first { case Lifecycle.MatchStarted(_) => true; case _ => false },
       finish = first { case Lifecycle.MatchFinished(_) => true; case _ => false }
     )
 
