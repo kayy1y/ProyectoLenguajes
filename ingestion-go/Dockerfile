@@ -1,7 +1,7 @@
 # Contexto de build: raíz del repositorio (necesita contracts/).
 FROM golang:1.26-alpine AS build
 WORKDIR /src/ingestion-go
-COPY ingestion-go/go.mod ./
+COPY ingestion-go/go.mod ingestion-go/go.sum ./
 RUN go mod download
 COPY ingestion-go/ ./
 RUN CGO_ENABLED=0 go build -trimpath -ldflags="-s -w" -o /out/ingestion ./cmd/ingestion

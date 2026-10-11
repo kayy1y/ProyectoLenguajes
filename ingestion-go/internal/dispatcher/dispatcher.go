@@ -8,36 +8,48 @@ import (
 	"context"
 	"log/slog"
 	"sync"
+	"time"
 
-	"gamestats/ingestion-go/internal/analysis"
 	"gamestats/ingestion-go/internal/event"
 	"gamestats/ingestion-go/internal/match"
 	"gamestats/ingestion-go/internal/store"
 )
 
+type Config struct {
+	QueueSize      int
+	MatchQueueSize int
+	TombstoneTTL   time.Duration
+	Match          match.Config
+}
+
+type tombstone struct {
+	code string
+	at   time.Time
+}
+
 type Dispatcher struct {
-	in             chan match.Envelope
-	done           chan event.Key
-	jobs           chan<- analysis.Job
-	matchQueueSize int
-	store          *store.Store
-	log            *slog.Logger
+	cfg   Config
+	in    chan match.Envelope
+	done  chan match.Closed
+	pool  match.Submitter
+	store *store.Store
+	log   *slog.Logger
 
 	// Confinados a la goroutine de Run.
 	workers map[event.Key]chan match.Envelope
-	closed  map[event.Key]struct{}
+	closed  map[event.Key]tombstone
 }
 
-func New(queueSize, matchQueueSize int, jobs chan<- analysis.Job, st *store.Store, log *slog.Logger) *Dispatcher {
+func New(cfg Config, pool match.Submitter, st *store.Store, log *slog.Logger) *Dispatcher {
 	return &Dispatcher{
-		in:             make(chan match.Envelope, queueSize),
-		done:           make(chan event.Key, 64),
-		jobs:           jobs,
-		matchQueueSize: matchQueueSize,
-		store:          st,
-		log:            log.With("component", "dispatcher"),
-		workers:        make(map[event.Key]chan match.Envelope),
-		closed:         make(map[event.Key]struct{}),
+		cfg:     cfg,
+		in:      make(chan match.Envelope, cfg.QueueSize),
+		done:    make(chan match.Closed, 64),
+		pool:    pool,
+		store:   st,
+		log:     log.With("component", "dispatcher"),
+		workers: make(map[event.Key]chan match.Envelope),
+		closed:  make(map[event.Key]tombstone),
 	}
 }
 
@@ -52,9 +64,13 @@ func (d *Dispatcher) Submit(ctx context.Context, env match.Envelope) error {
 }
 
 // Run bloquea hasta que ctx se cancela y todos los workers terminaron.
-func (d *Dispatcher) Run(ctx context.Context) {
+// flushCtx se entrega a los workers para acotar el envío de lotes al apagar.
+func (d *Dispatcher) Run(ctx, flushCtx context.Context) {
 	var wg sync.WaitGroup
+	sweep := time.NewTicker(d.cfg.TombstoneTTL / 4)
+	defer sweep.Stop()
 	defer func() {
+		// Cerrar el canal es la señal de apagado; cada worker vacía su partida y sale.
 		for _, ch := range d.workers {
 			close(ch)
 		}
@@ -63,36 +79,42 @@ func (d *Dispatcher) Run(ctx context.Context) {
 	for {
 		select {
 		case env := <-d.in:
-			d.route(ctx, env, &wg)
-		case k := <-d.done:
+			d.route(flushCtx, env, &wg)
+		case c := <-d.done:
 			// El worker ya envió su lote: se cierra su canal (solo el emisor cierra)
 			// y la partida queda marcada para rechazar eventos posteriores.
-			if ch, ok := d.workers[k]; ok {
+			if ch, ok := d.workers[c.Key]; ok {
 				close(ch)
-				delete(d.workers, k)
+				delete(d.workers, c.Key)
 			}
-			d.closed[k] = struct{}{}
+			d.closed[c.Key] = tombstone{code: c.RejectCode, at: time.Now()}
+		case now := <-sweep.C:
+			for k, t := range d.closed {
+				if now.Sub(t.at) > d.cfg.TombstoneTTL {
+					delete(d.closed, k)
+				}
+			}
 		case <-ctx.Done():
 			return
 		}
 	}
 }
 
-func (d *Dispatcher) route(ctx context.Context, env match.Envelope, wg *sync.WaitGroup) {
+func (d *Dispatcher) route(flushCtx context.Context, env match.Envelope, wg *sync.WaitGroup) {
 	k := env.Event.Key()
-	if _, ok := d.closed[k]; ok {
-		env.Reply <- match.Ack{Status: match.Rejected, Code: "MATCH_CLOSED"}
+	if t, ok := d.closed[k]; ok {
+		env.Reply <- match.Ack{Status: match.Rejected, Code: t.code}
 		return
 	}
 	ch, ok := d.workers[k]
 	if !ok {
-		ch = make(chan match.Envelope, d.matchQueueSize)
+		ch = make(chan match.Envelope, d.cfg.MatchQueueSize)
 		d.workers[k] = ch
-		w := match.NewWorker(k, ch, d.jobs, d.done, d.store, d.log)
+		w := match.NewWorker(k, d.cfg.Match, ch, d.pool, d.done, d.store, d.log)
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			w.Run(ctx)
+			w.Run(flushCtx)
 		}()
 		d.log.Info("match worker started", "gameId", k.GameID, "matchId", k.MatchID, "activeMatches", len(d.workers))
 	}
