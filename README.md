@@ -80,7 +80,6 @@ El detalle completo está en [docs/protocol.md](docs/protocol.md).
 - [Deployment](docs/deployment.md)
 - [Guion de demo](docs/demo.md)
 - [Defensa](docs/defense.md)
-- [Plan del proyecto](docs/PLAN.md)
 
 ## CI/CD
 

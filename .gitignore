@@ -27,3 +27,7 @@ data/
 .vscode/
 .DS_Store
 e2e-logs.txt
+
+# Documentos de planificación (solo locales)
+GameStats_Claude_Plan_Contexto.md
+docs/PLAN.md
