@@ -31,7 +31,7 @@ Go 1.26 y un compilador de C, porque la ventana usa [Fyne](https://fyne.io), que
 |---|---|
 | macOS | `xcode-select --install` |
 | Windows | gcc de MSYS2 o TDM-GCC |
-| Linux (Debian/Ubuntu) | `sudo apt install gcc libgl1-mesa-dev xorg-dev` |
+| Linux (Debian/Ubuntu) | `sudo apt install gcc libgl1-mesa-dev xorg-dev libwayland-dev libxkbcommon-dev wayland-protocols` |
 
 Si no se quiere compilar, CI publica el ejecutable de los tres sistemas como artefacto (`gamestats-gui-Linux`, `-macOS` y `-Windows`) en cada ejecución de *Actions → CI*.
 

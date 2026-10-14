@@ -96,7 +96,7 @@ Instala una sola vez lo que pide tu sistema operativo:
 |---|---|
 | macOS | [Go 1.26](https://go.dev/dl/) y `xcode-select --install` |
 | Windows | [Go 1.26](https://go.dev/dl/) y un gcc ([MSYS2](https://www.msys2.org/) o TDM-GCC) |
-| Linux (Debian/Ubuntu) | [Go 1.26](https://go.dev/dl/) y `sudo apt install gcc libgl1-mesa-dev xorg-dev` |
+| Linux (Debian/Ubuntu) | [Go 1.26](https://go.dev/dl/) y `sudo apt install gcc libgl1-mesa-dev xorg-dev libwayland-dev libxkbcommon-dev wayland-protocols` |
 
 Después, desde la carpeta del proyecto:
 

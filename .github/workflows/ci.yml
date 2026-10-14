@@ -74,9 +74,9 @@ jobs:
         with:
           go-version-file: simulator/go.mod
           cache-dependency-path: simulator/go.sum
-      - name: Install OpenGL and X11 headers
+      - name: Install OpenGL, X11 and Wayland headers
         if: runner.os == 'Linux'
-        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev xorg-dev
+        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev xorg-dev libwayland-dev libxkbcommon-dev wayland-protocols
       - run: go vet -tags gui ./cmd/gui
       - name: Window smoke test
         run: go test -tags gui -count=1 -run TestWindowBuildsWithoutIngestion ./cmd/gui
