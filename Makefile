@@ -1,4 +1,4 @@
-.PHONY: help build test test-go test-scala up down demo e2e results fmt
+.PHONY: help build test test-go test-scala up down demo gui gui-run e2e results fmt
 
 GAME ?= arena-combat
 MATCH ?= match-a1
@@ -16,6 +16,7 @@ test: test-go test-scala
 test-go:
 	cd ingestion-go && go test -race -count=1 ./...
 	cd simulator && go test -race -count=1 ./...
+	cd simulator && go test -tags gui -count=1 -run TestWindowBuildsWithoutIngestion ./cmd/gui
 
 test-scala:
 	cd analytics-scala && sbt test
@@ -28,6 +29,14 @@ down:
 
 demo:
 	docker compose --profile demo run --rm simulator --scenario demo --seed 42
+
+# Aplicación de escritorio (ventana nativa, Fyne). Necesita Go y un compilador de C.
+gui:
+	cd simulator && go build -tags gui -trimpath -o ../bin/gamestats-gui ./cmd/gui
+	@echo "Ejecutable: bin/gamestats-gui"
+
+gui-run: gui
+	./bin/gamestats-gui
 
 e2e:
 	./tests/e2e/e2e.sh

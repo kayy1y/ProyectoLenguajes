@@ -26,6 +26,7 @@ type Config struct {
 	Out      io.Writer
 	Client   *http.Client
 	PollWait time.Duration
+	OnAck    func(Ack) // opcional: se llama con cada respuesta (progreso en vivo)
 }
 
 type Ack struct {
@@ -113,7 +114,11 @@ func post(ctx context.Context, cfg Config, match string, line []byte, rep *Repor
 	if len(body.Errors) > 0 {
 		code = body.Errors[0].Code + " " + body.Errors[0].Field
 	}
-	rep.add(Ack{Match: match, EventID: body.EventID, HTTP: resp.StatusCode, Status: body.Status, Code: code})
+	ack := Ack{Match: match, EventID: body.EventID, HTTP: resp.StatusCode, Status: body.Status, Code: code}
+	rep.add(ack)
+	if cfg.OnAck != nil {
+		cfg.OnAck(ack)
+	}
 	if cfg.Verbose {
 		fmt.Fprintf(cfg.Out, "%-22s %-24s %d %s %s\n", match, body.EventID, resp.StatusCode, body.Status, code)
 	}

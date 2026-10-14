@@ -14,7 +14,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"reflect"
 	"strings"
 	"time"
 
@@ -22,6 +21,7 @@ import (
 
 	"gamestats/simulator/internal/scenario"
 	"gamestats/simulator/internal/sender"
+	"gamestats/simulator/internal/verify"
 )
 
 func main() {
@@ -167,39 +167,19 @@ func compareExpected(fixturesDir, suffix string, ms []scenario.Match, results ma
 	fmt.Println("--- comparación con contracts/expected")
 	ok := true
 	for _, m := range ms {
-		name := strings.TrimSuffix(m.MatchID, suffix)
-		file := findExpected(fixturesDir, m.GameID, name)
-		b, err := os.ReadFile(file)
-		if err != nil {
-			fmt.Printf("FAIL %s: %v\n", m.MatchID, err)
-			ok = false
+		c := verify.Expected(fixturesDir, suffix, m.GameID, m.MatchID, results[m.MatchID].Result)
+		if c.Pass {
+			fmt.Printf("ok   %s\n", c.Name)
 			continue
 		}
-		var want, got any
-		json.Unmarshal(b, &want)
-		json.Unmarshal(results[m.MatchID].Result, &got)
-		if suffix == "" && reflect.DeepEqual(want, got) {
-			fmt.Printf("ok   %s\n", filepath.Base(file))
-		} else if suffix != "" {
-			fmt.Printf("skip %s (con --suffix los ids cambian)\n", filepath.Base(file))
+		ok = false
+		if c.Detail != "" {
+			fmt.Printf("FAIL %s: %s\n", c.Name, c.Detail)
 		} else {
-			fmt.Printf("FAIL %s\n  esperado: %s\n  obtenido: %s\n", filepath.Base(file), b, results[m.MatchID].Result)
-			ok = false
+			fmt.Printf("FAIL %s\n  esperado: %s\n  obtenido: %s\n", c.Name, c.Expected, c.Actual)
 		}
 	}
 	return ok
-}
-
-func findExpected(fixturesDir, gameID, matchID string) string {
-	var idx map[string]struct{ GameID, MatchID, Expected string }
-	b, _ := os.ReadFile(filepath.Join(fixturesDir, "index.json"))
-	json.Unmarshal(b, &idx)
-	for _, f := range idx {
-		if f.GameID == gameID && f.MatchID == matchID {
-			return filepath.Join(fixturesDir, f.Expected)
-		}
-	}
-	return filepath.Join(fixturesDir, "missing-"+matchID)
 }
 
 func env(key, def string) string {

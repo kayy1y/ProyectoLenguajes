@@ -272,6 +272,31 @@ func Stress(seed uint64, n int) []Match {
 	return out
 }
 
+// WithSuffix devuelve la partida con matchId y eventId terminados en suffix, para
+// poder repetir un escenario sin chocar con partidas ya cerradas.
+func WithSuffix(m Match, suffix string) Match {
+	if suffix == "" {
+		return m
+	}
+	rewrite := func(line []byte) []byte {
+		return mutate(line, func(e map[string]any) {
+			e["matchId"] = e["matchId"].(string) + suffix
+			e["eventId"] = e["eventId"].(string) + suffix
+		})
+	}
+	out := m
+	out.MatchID = m.MatchID + suffix
+	out.Lines = nil
+	for _, l := range m.Lines {
+		out.Lines = append(out.Lines, rewrite(l))
+	}
+	out.AfterAnalyzed = nil
+	for _, l := range m.AfterAnalyzed {
+		out.AfterAnalyzed = append(out.AfterAnalyzed, rewrite(l))
+	}
+	return out
+}
+
 func mutate(line []byte, f func(map[string]any)) []byte {
 	var e map[string]any
 	json.Unmarshal(line, &e)

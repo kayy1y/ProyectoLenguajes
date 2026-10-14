@@ -3,7 +3,7 @@
 FROM --platform=$BUILDPLATFORM golang:1.26-alpine AS build
 ARG TARGETOS TARGETARCH
 WORKDIR /src/simulator
-COPY simulator/go.mod ./
+COPY simulator/go.mod simulator/go.sum ./
 RUN go mod download
 COPY simulator/ ./
 RUN CGO_ENABLED=0 GOOS=$TARGETOS GOARCH=$TARGETARCH go build -trimpath -ldflags="-s -w" -o /out/simulator ./cmd/simulator

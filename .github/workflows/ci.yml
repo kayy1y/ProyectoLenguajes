@@ -56,6 +56,42 @@ jobs:
       - name: sbt test assembly
         run: sbt -batch test assembly
 
+  gui:
+    name: Desktop app (${{ matrix.os }})
+    needs: [go]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    defaults:
+      run:
+        shell: bash
+        working-directory: simulator
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-go@v7
+        with:
+          go-version-file: simulator/go.mod
+          cache-dependency-path: simulator/go.sum
+      - name: Install OpenGL and X11 headers
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y libgl1-mesa-dev xorg-dev
+      - run: go vet -tags gui ./cmd/gui
+      - name: Window smoke test
+        run: go test -tags gui -count=1 -run TestWindowBuildsWithoutIngestion ./cmd/gui
+      - name: Build executable
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            go build -tags gui -trimpath -ldflags="-H=windowsgui" -o ../bin/gamestats-gui.exe ./cmd/gui
+          else
+            go build -tags gui -trimpath -o ../bin/gamestats-gui ./cmd/gui
+          fi
+      - uses: actions/upload-artifact@v7
+        with:
+          name: gamestats-gui-${{ runner.os }}
+          path: bin/
+
   docker:
     name: Docker images
     needs: [go, scala]

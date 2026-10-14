@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"math/rand/v2"
+	"strings"
 	"testing"
 	"time"
 )
@@ -89,4 +90,22 @@ func equal(a, b []Match) bool {
 		}
 	}
 	return true
+}
+
+func TestWithSuffixRewritesIDs(t *testing.T) {
+	ms := Stress(7, 2)
+	got := WithSuffix(ms[0], "-x1")
+	if got.MatchID != ms[0].MatchID+"-x1" || len(got.Lines) != len(ms[0].Lines) {
+		t.Fatalf("matchId o cantidad de eventos incorrectos: %s", got.MatchID)
+	}
+	var first map[string]any
+	if err := json.Unmarshal(got.Lines[0], &first); err != nil {
+		t.Fatal(err)
+	}
+	if first["matchId"] != got.MatchID || !strings.HasSuffix(first["eventId"].(string), "-x1") {
+		t.Fatalf("el evento no lleva el sufijo: %v", first)
+	}
+	if WithSuffix(ms[0], "").MatchID != ms[0].MatchID {
+		t.Fatal("sufijo vacío no debe cambiar nada")
+	}
 }

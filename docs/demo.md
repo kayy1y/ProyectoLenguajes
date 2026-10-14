@@ -2,6 +2,8 @@
 
 `scripts/demo.sh` ejecuta estos pasos con pausas (`ENTER` para avanzar). Necesita Docker, curl y jq.
 
+**Alternativa sin terminal:** la aplicación de escritorio (`make gui-run`, ver [gui.md](gui.md)) hace lo mismo con clics: *Generar datos* → *Partidas* → *Verificación*. Su pestaña *Guía* trae el recorrido para el evaluador.
+
 | # | Qué se muestra | Comando | Requisito |
 |---|---|---|---|
 | 1 | Dos servicios separados y sanos | `docker compose up -d --build --wait && docker compose ps` | AC-14, AC-15 |

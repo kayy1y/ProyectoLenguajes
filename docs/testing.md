@@ -3,7 +3,9 @@
 | Nivel | Cantidad | Comando | Dónde |
 |---|---|---|---|
 | Go `ingestion-go` (unitarias y de sistema, con `-race`) | 19 | `cd ingestion-go && go test -race ./...` | `internal/*/*_test.go` |
-| Go `simulator` | 3 | `cd simulator && go test -race ./...` | `internal/scenario` |
+| Go `simulator` (incluye la lógica de la app de escritorio) | 14 | `cd simulator && go test -race ./...` | `internal/scenario`, `internal/lab`, `internal/verify` |
+| Aplicación de escritorio | 2 | `cd simulator && go test -tags gui ./cmd/gui` | `cmd/gui` ([gui.md](gui.md)) |
+| Suite de verificación (desde la app) | 37 comprobaciones | pestaña *Verificación* de `bin/gamestats-gui` | [gui.md](gui.md) |
 | Scala (golden, propiedades, unitarias, HTTP) | 42 | `cd analytics-scala && sbt test` | `src/test/scala/gamestats` |
 | End-to-end sobre Docker Compose | 23 comprobaciones | `make e2e` o `./tests/e2e/e2e.sh` | `tests/e2e/e2e.sh` |
 
