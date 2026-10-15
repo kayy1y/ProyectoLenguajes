@@ -25,16 +25,17 @@ No hace falta un videojuego real: un **simulador** genera partidas de dos juegos
 ## Contenido
 
 1. [Requisitos](#1-requisitos)
-2. [Instalar y arrancar](#2-instalar-y-arrancar)
-3. [Forma 1: probarlo con la interfaz gráfica](#3-forma-1-probarlo-con-la-interfaz-gráfica)
-4. [Forma 2: probarlo desde la terminal](#4-forma-2-probarlo-desde-la-terminal)
-5. [Qué calcula](#5-qué-calcula)
-6. [API](#6-api)
-7. [Configuración](#7-configuración)
-8. [Problemas frecuentes](#8-problemas-frecuentes)
-9. [Estructura del repositorio](#9-estructura-del-repositorio)
-10. [Desarrollo, pruebas automáticas y CI/CD](#10-desarrollo-pruebas-automáticas-y-cicd)
-11. [Documentación técnica](#11-documentación-técnica)
+2. [Instalar y arrancar en tu computadora](#2-instalar-y-arrancar-en-tu-computadora)
+3. [Versión desplegada en la nube](#3-versión-desplegada-en-la-nube)
+4. [Forma 1: probarlo con la interfaz gráfica](#4-forma-1-probarlo-con-la-interfaz-gráfica)
+5. [Forma 2: probarlo desde la terminal](#5-forma-2-probarlo-desde-la-terminal)
+6. [Qué calcula](#6-qué-calcula)
+7. [API](#7-api)
+8. [Configuración](#8-configuración)
+9. [Problemas frecuentes](#9-problemas-frecuentes)
+10. [Estructura del repositorio](#10-estructura-del-repositorio)
+11. [Desarrollo, pruebas automáticas y CI/CD](#11-desarrollo-pruebas-automáticas-y-cicd)
+12. [Documentación técnica](#12-documentación-técnica)
 
 ---
 
@@ -45,7 +46,7 @@ Depende de lo que quieras hacer:
 | Para… | Necesitas |
 |---|---|
 | **Levantar el sistema** (lo único obligatorio) | [Docker Desktop](https://www.docker.com/products/docker-desktop/) o Docker Engine con Compose v2. No hace falta instalar Go, Java ni Scala: todo se compila dentro de los contenedores |
-| **Probarlo con la interfaz gráfica** | Go 1.26 y un compilador de C (ver [3.1](#31-compilar-y-abrir-la-aplicación)). También puedes bajar el ejecutable ya compilado desde GitHub Actions |
+| **Probarlo con la interfaz gráfica** | Go 1.26 y un compilador de C (ver [4.1](#41-compilar-y-abrir-la-aplicación)). También puedes bajar el ejecutable ya compilado desde GitHub Actions |
 | **Probarlo desde la terminal** | `curl` y `jq` (en macOS: `brew install jq`; en Ubuntu: `sudo apt install jq curl`) |
 | **Usar los atajos `make …`** | `make` (viene en macOS y Linux). En Windows puedes usar directamente los comandos `docker compose …` que aparecen junto a cada atajo |
 | **Modificar el código y correr las pruebas unitarias** | Go 1.26, JDK 21 y sbt 1.x |
@@ -54,7 +55,7 @@ Puertos que usa: **8080** (servicio Go, el único expuesto). El servicio Scala (
 
 ---
 
-## 2. Instalar y arrancar
+## 2. Instalar y arrancar en tu computadora
 
 ```bash
 git clone https://github.com/kayy1y/ProyectoLenguajes.git
@@ -73,7 +74,7 @@ curl -s localhost:8080/healthz
 
 Debes ver los servicios `analytics` e `ingestion` en estado `healthy`, y la respuesta `{"status":"ok"}`.
 
-> El sistema no tiene una pantalla propia: es un servicio que espera eventos. Para verlo funcionar tienes dos caminos: la **interfaz gráfica** (sección 3) o la **terminal** (sección 4). Los dos usan el mismo sistema, así que puedes combinarlos.
+> El sistema no tiene una pantalla propia: es un servicio que espera eventos. Para verlo funcionar tienes dos caminos: la **interfaz gráfica** (sección 4) o la **terminal** (sección 5). Los dos usan el mismo sistema, así que puedes combinarlos.
 
 Para apagarlo:
 
@@ -84,11 +85,58 @@ docker compose down -v     # apaga y borra todo, para empezar de cero
 
 ---
 
-## 3. Forma 1: probarlo con la interfaz gráfica
+## 3. Versión desplegada en la nube
+
+El proyecto también está publicado en internet, para que puedas probarlo sin instalar nada:
+
+| | |
+|---|---|
+| **Dirección** | https://gamestats-ingestion.onrender.com |
+| **Comprobar que está vivo** | https://gamestats-ingestion.onrender.com/healthz (debe responder `{"status":"ok"}`) |
+| **Servicio de análisis (Scala)** | https://gamestats-analytics.onrender.com/health (debe responder `{"status":"ok"}`). Lo usa la ingestión; no hace falta llamarlo directamente |
+| **Plataforma** | [Render](https://render.com), plan gratuito |
+
+**Antes de usarla, ten en cuenta:**
+- **Se duerme** si nadie la usa durante 15 minutos. La primera petición tarda alrededor de un minuto en despertarla. Abre el `/healthz` un minuto antes de la demo.
+- **Los resultados no duran:** están en memoria, así que cuando el servicio se duerme se borran. Si quieres estadísticas, genera datos de nuevo (sección 5.3 o la pestaña *Generar datos* de la aplicación).
+- **Escribir requiere clave:** los eventos nuevos llevan la clave de API (`X-API-Key`). Pídela al equipo; las lecturas (`GET`) son públicas.
+
+### Cómo probarla
+
+Con la aplicación de escritorio, apuntando a la nube:
+```bash
+./bin/gamestats-gui --target https://gamestats-ingestion.onrender.com --api-key TU_CLAVE
+```
+
+Con la terminal, la verificación completa:
+```bash
+docker compose --profile demo run --rm --no-deps simulator --target https://gamestats-ingestion.onrender.com --api-key TU_CLAVE --fixture all --expect --wait 240s
+```
+Debe terminar con 8 líneas `ok`.
+
+Para consultar un resultado (no necesita clave):
+```bash
+curl -s https://gamestats-ingestion.onrender.com/v1/games/arena-combat/matches/match-a1/results | jq '.result.playerStats'
+```
+
+### Otras formas de desplegarlo
+
+| Opción | Costo | Cuándo usarla |
+|---|---|---|
+| **Render con el Blueprint** (la que usamos) | Gratis, sin tarjeta | Es la forma más simple. El archivo [`render.yaml`](render.yaml) describe los dos servicios; en Render: *New → Blueprint* → este repositorio → *Apply* |
+| **Redespliegue automático** | Gratis | Cada push a `main` vuelve a desplegar. Requiere configurar los secretos `RENDER_DEPLOY_HOOK_ANALYTICS` y `RENDER_DEPLOY_HOOK_INGESTION` en GitHub |
+| **VM con Docker Compose** | Según el proveedor | Servidor propio, siempre encendido. Usa [`deploy/docker-compose.deploy.yml`](deploy/docker-compose.deploy.yml) |
+| **Túnel desde tu computadora** (`cloudflared tunnel --url http://localhost:8080`) | Gratis | Solo mientras tu computadora esté encendida. Úsala como respaldo |
+
+Los pasos completos de cada opción están en [docs/deployment.md](docs/deployment.md).
+
+---
+
+## 4. Forma 1: probarlo con la interfaz gráfica
 
 Es una **aplicación de escritorio** (una ventana normal, no una página web) para recorrer todo el proyecto con clics. Se conecta al sistema que levantaste en el paso anterior.
 
-### 3.1 Compilar y abrir la aplicación
+### 4.1 Compilar y abrir la aplicación
 
 Instala una sola vez lo que pide tu sistema operativo:
 
@@ -117,7 +165,7 @@ La primera compilación tarda alrededor de un minuto.
 
 **Sin compilar nada:** cada ejecución de CI deja el ejecutable para Linux, macOS y Windows. En GitHub entra a **Actions → CI**, abre la ejecución más reciente en verde y descarga el artefacto `gamestats-gui-<tu sistema>`. Hay que ejecutarlo dentro de la carpeta del repositorio, porque lee los casos de prueba de `contracts/`.
 
-### 3.2 Recorrido sugerido (5 minutos)
+### 4.2 Recorrido sugerido (5 minutos)
 
 La pestaña **Guía** de la aplicación trae este mismo recorrido.
 
@@ -132,7 +180,7 @@ La pestaña **Guía** de la aplicación trae este mismo recorrido.
    Con **Guardar informe…** obtienes un `.md` que sirve como evidencia.
 5. **Enviar evento**: elige una plantilla inválida (por ejemplo `bad-timestamp.json`), pulsa **Enviar** y mira cómo el sistema indica el campo y el motivo del error.
 
-### 3.3 Qué hay en cada pestaña
+### 4.3 Qué hay en cada pestaña
 
 | Pestaña | Qué puedes hacer |
 |---|---|
@@ -149,13 +197,13 @@ Para conectarla a un servidor remoto: `./bin/gamestats-gui --target http://<ip>:
 
 ---
 
-## 4. Forma 2: probarlo desde la terminal
+## 5. Forma 2: probarlo desde la terminal
 
 Todo lo que hace la interfaz también se puede hacer desde la terminal. Los comandos se ejecutan desde la carpeta del proyecto, con el sistema levantado.
 
 > **Usuarios de macOS (zsh):** no pegues las líneas que empiezan con `#`, porque zsh no las trata como comentarios. Si quieres pegarlas, ejecuta antes `setopt interactivecomments`.
 
-### 4.1 Verificación automática (el camino más rápido)
+### 5.1 Verificación automática (el camino más rápido)
 
 Envía las 8 partidas de prueba y compara cada resultado con el calculado a mano:
 
@@ -175,7 +223,7 @@ ok   F18-racing-no-comeback.result.json
 
 Si lo vuelves a correr sin borrar los datos, agrega `--suffix -2` (o `-3`, …): las partidas ya cerradas no se reabren y el sistema rechazaría sus eventos.
 
-### 4.2 Ver un resultado
+### 5.2 Ver un resultado
 
 ```bash
 curl -s localhost:8080/v1/games/arena-combat/matches/match-a1/results | jq '.result'      # o: make results
@@ -203,7 +251,7 @@ curl -s localhost:8080/v1/games/street-racing/matches/race-r1/results | jq '.res
 curl -s localhost:8080/v1/matches | jq -c '.[] | {matchId, status, completeness}'               # todas las partidas
 ```
 
-### 4.3 Escenario demo
+### 5.3 Escenario demo
 
 ```bash
 make demo
@@ -232,7 +280,7 @@ Cada línea demuestra algo:
 
 La partida `demo-open` nunca termina y se analiza sola como `INCOMPLETE`. Si ya corriste los fixtures, agrega `--suffix -2`.
 
-### 4.4 Demo guiada paso a paso
+### 5.4 Demo guiada paso a paso
 
 ```bash
 ./scripts/demo.sh
@@ -240,7 +288,7 @@ La partida `demo-open` nunca termina y se analiza sola como `INCOMPLETE`. Si ya 
 
 Recorre las mismas pruebas de la demostración con pausas: pulsa ENTER para avanzar. El guion completo está en [docs/demo.md](docs/demo.md).
 
-### 4.5 Pruebas a mano, evento por evento
+### 5.5 Pruebas a mano, evento por evento
 
 Para armar tu propia partida y calcular el resultado con calculadora, carga primero estas funciones auxiliares:
 
@@ -275,7 +323,7 @@ Cada envío responde `{"status":"ACCEPTED",...} [202]`. Después de 3 segundos, 
 
 Para repetir la prueba, cambia el sufijo (`S=-2`) o borra todo con `docker compose down -v`.
 
-### 4.6 Prueba de punta a punta
+### 5.6 Prueba de punta a punta
 
 ```bash
 make e2e      # o: ./tests/e2e/e2e.sh
@@ -292,7 +340,7 @@ Debe terminar con `E2E OK`. Al final **apaga el sistema y borra sus datos**: vue
 
 ---
 
-## 5. Qué calcula
+## 6. Qué calcula
 
 Se implementaron dos juegos muy distintos para demostrar que el núcleo no depende de uno solo:
 
@@ -312,7 +360,7 @@ Cuando una métrica no se puede calcular (por ejemplo, la precisión de alguien 
 
 ---
 
-## 6. API
+## 7. API
 
 Todo se consulta en el servicio Go, en el puerto 8080:
 
@@ -357,7 +405,7 @@ El protocolo completo, incluida la comunicación entre Go y Scala, está en [doc
 
 ---
 
-## 7. Configuración
+## 8. Configuración
 
 Los valores por defecto sirven para probar en local. Para cambiarlos, copia `.env.example` a `.env` y edítalo. Docker Compose lo lee solo. Las variables más útiles son:
 
@@ -372,7 +420,7 @@ Los valores por defecto sirven para probar en local. Para cambiarlos, copia `.en
 
 ---
 
-## 8. Problemas frecuentes
+## 9. Problemas frecuentes
 
 | Síntoma | Causa y solución |
 |---|---|
@@ -383,13 +431,13 @@ Los valores por defecto sirven para probar en local. Para cambiarlos, copia `.en
 | `command not found: mk` (o `ev`, `res`) | Esa terminal no tiene las funciones auxiliares. Ejecuta `source scripts/pruebas.sh` |
 | zsh muestra errores con líneas que empiezan con `#` | No pegues los comentarios, o ejecuta `setopt interactivecomments` |
 | `jq: command not found` | Instala jq (`brew install jq` o `sudo apt install jq`) |
-| La app no compila: falta `cc`, `gcc` o `GL/gl.h` | Falta el compilador de C o las librerías gráficas. Revisa la tabla de [3.1](#31-compilar-y-abrir-la-aplicación) |
+| La app no compila: falta `cc`, `gcc` o `GL/gl.h` | Falta el compilador de C o las librerías gráficas. Revisa la tabla de [4.1](#41-compilar-y-abrir-la-aplicación) |
 | La app dice «no se encontró la carpeta contracts/» | Ejecútala dentro de la carpeta del repositorio, o pásale `--contracts <ruta>/contracts` |
 | Un resultado sigue en `COLLECTING` | Falta el `MATCH_FINISHED`, o no han pasado los 2 s de gracia. Espera unos segundos; sin final, la partida se cierra sola a los 15 s |
 
 ---
 
-## 9. Estructura del repositorio
+## 10. Estructura del repositorio
 
 | Carpeta | Qué contiene |
 |---|---|
@@ -404,7 +452,7 @@ Los valores por defecto sirven para probar en local. Para cambiarlos, copia `.en
 
 ---
 
-## 10. Desarrollo, pruebas automáticas y CI/CD
+## 11. Desarrollo, pruebas automáticas y CI/CD
 
 Con Go 1.26, JDK 21 y sbt instalados:
 
@@ -436,7 +484,7 @@ La matriz completa de casos está en [docs/testing.md](docs/testing.md).
 
 ---
 
-## 11. Documentación técnica
+## 12. Documentación técnica
 
 | Documento | Contenido |
 |---|---|
