@@ -490,6 +490,7 @@ La matriz completa de casos está en [docs/testing.md](docs/testing.md).
 |---|---|
 | [Arquitectura y concurrencia](docs/architecture.md) | Componentes, goroutines y canales, estados de una partida, qué se pierde al reiniciar |
 | [Especificación de eventos](docs/event-spec.md) | Formato de los eventos, para quien quiera producirlos |
+| [Guía de la entrega](docs/entrega.md) | Dónde está cada entregable del enunciado y un recorrido corto para probar |
 | [Juegos y eventos](docs/games.md) | Qué juegos elegimos, por qué esos eventos y qué estadísticas permiten |
 | [Protocolo](docs/protocol.md) | API de Go y contrato entre Go y Scala |
 | [Estadísticas y patrones](docs/statistics.md) | Cómo se deriva cada métrica, con ejemplos |
