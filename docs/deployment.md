@@ -52,7 +52,7 @@ En cada servicio de Render → **Settings → Deploy Hook**, copiar la URL y gua
 
 | Opción | Costo | Notas |
 |---|---|---|
-| **VM con créditos estudiantiles** (p. ej. DigitalOcean o Azure vía GitHub Student Developer Pack) | 0 con créditos | Recomendada. 1 vCPU / 1 GB alcanza con `JAVA_OPTS=-Xmx256m` y 1 GB de swap. Verificar que la oferta siga vigente |
+| VM en un proveedor de nube | Variable | Cualquier VM Linux con 1 GB y Docker sirve (1 vCPU alcanza con `JAVA_OPTS=-Xmx256m` y 1 GB de swap). Los créditos estudiantiles suelen tener las VM baratas bloqueadas o ya no están vigentes |
 | Oracle Cloud Always Free (ARM) | 0 | Las imágenes ya son arm64; dar de alta la cuenta a veces falla |
 | GCP e2-micro / AWS free tier | 0 o bajo | Revisar las condiciones vigentes del free tier |
 | Máquina propia o del laboratorio con túnel (`cloudflared tunnel --url http://localhost:8080`) | 0 | Respaldo; **confirmar con el docente** que lo acepta como deployment |
