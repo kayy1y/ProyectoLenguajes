@@ -429,10 +429,10 @@ La matriz completa de casos está en [docs/testing.md](docs/testing.md).
 | Workflow | Cuándo corre | Qué hace |
 |---|---|---|
 | `ci.yml` | En cada push y pull request | Formato, `vet`, compilación, pruebas de Go y Scala, construcción de las imágenes Docker, prueba de punta a punta y ejecutable de escritorio para Linux, macOS y Windows |
-| `release.yml` | Push a `main` y tags `v*` | Publica las imágenes (amd64 y arm64) en GitHub Container Registry |
+| `release.yml` | Push a `main` y tags `v*` | Publica las imágenes (amd64 y arm64) en GitHub Container Registry y, si están configurados los deploy hooks, redespliega en Render |
 | `deploy.yml` | Manual | Despliega una versión en el servidor por SSH y comprueba que responda |
 
-Para desplegar en un servidor (una VM con Docker), sigue [docs/deployment.md](docs/deployment.md).
+**Despliegue:** la forma recomendada es **Render**, gratis y sin tarjeta. El archivo [`render.yaml`](render.yaml) define los dos servicios y se despliega en *New → Blueprint*. También se puede usar una VM con Docker Compose. Los pasos de ambas opciones están en [docs/deployment.md](docs/deployment.md).
 
 ---
 

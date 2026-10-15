@@ -5,7 +5,7 @@
 | Pieza | Cómo |
 |---|---|
 | Imágenes | `release.yml` publica `ghcr.io/<owner>/gamestats-{ingestion,analytics,simulator}` para amd64 y arm64 en cada push a `main` (etiquetas `latest` y `sha-<commit>`) y en cada tag `v*` |
-| Servidor | Una VM Linux pequeña con Docker y `deploy/docker-compose.deploy.yml` |
+| Servidor | **Render** con `render.yaml` (recomendado, gratis), o una VM Linux con Docker y `deploy/docker-compose.deploy.yml` |
 | Despliegue | **Manual y documentado** (abajo), o con el botón *Run workflow* de `deploy.yml` si se configuran los secrets. No es un despliegue automático en cada push |
 | Exposición | Solo el puerto 8080 (ingestion). Scala queda en la red interna de Docker. Las escrituras exigen `X-API-Key` |
 
@@ -13,7 +13,42 @@
 > CD de artefactos = publicar imágenes en GHCR (automático).
 > Despliegue en el servidor = manual o con un clic.
 
-## Opciones de servidor
+## Opción recomendada: Render (gratis, sin tarjeta y sin servidor que administrar)
+
+`render.yaml`, en la raíz del repositorio, define los dos servicios como un *Blueprint* de Render. Usa las imágenes que `release.yml` publica en GHCR, así que Render no compila nada.
+
+| Servicio | Imagen | Exposición |
+|---|---|---|
+| `gamestats-analytics` | `ghcr.io/kayy1y/gamestats-analytics:latest` | URL pública (el plan gratuito no admite tráfico privado entrante); solo la usa la ingestión |
+| `gamestats-ingestion` | `ghcr.io/kayy1y/gamestats-ingestion:latest` | `https://gamestats-ingestion.onrender.com`; las escrituras exigen `X-API-Key` |
+
+### Pasos
+
+1. Entrar a **render.com** → **Sign up with GitHub**. No pide tarjeta.
+2. **New → Blueprint** → conectar el repositorio `ProyectoLenguajes` → **Apply**. Render crea los dos servicios y descarga las imágenes.
+3. Esperar a que los dos digan **Live** (unos 3 minutos).
+4. Comprobar la URL de Scala: en **gamestats-analytics**, arriba aparece su URL. Si **no** es `https://gamestats-analytics.onrender.com` (Render agrega un sufijo si el nombre ya existe), copiarla en **gamestats-ingestion → Environment → `ANALYTICS_URL`** y guardar.
+5. Obtener la clave: **gamestats-ingestion → Environment → `INGEST_API_KEY`**, que Render generó al azar.
+6. Probar desde cualquier máquina:
+   ```bash
+   curl -s https://gamestats-ingestion.onrender.com/healthz
+   docker compose --profile demo run --rm --no-deps simulator --target https://gamestats-ingestion.onrender.com --api-key <clave> --fixture all --expect --wait 240s
+   ```
+   Con la aplicación de escritorio: `./bin/gamestats-gui --target https://gamestats-ingestion.onrender.com --api-key <clave>`.
+
+### Redespliegue automático (opcional)
+
+En cada servicio de Render → **Settings → Deploy Hook**, copiar la URL y guardarla en GitHub → *Settings → Secrets and variables → Actions* como `RENDER_DEPLOY_HOOK_ANALYTICS` y `RENDER_DEPLOY_HOOK_INGESTION`. Desde entonces, cada push a `main` publica las imágenes y el job **Redeploy on Render** de `release.yml` pide a Render que las despliegue. Así se cierra el ciclo **commit → CI → imágenes → despliegue**.
+
+### Limitaciones del plan gratuito
+
+| Limitación | Efecto | Cómo convivir con ella |
+|---|---|---|
+| Los servicios se duermen tras 15 min sin tráfico | La primera petición tarda alrededor de 1 minuto | Abrir `/healthz` un minuto antes de la demo. Go espera hasta 90 s a que Scala despierte (`ANALYZE_TIMEOUT`) |
+| Sin disco persistente | Cuando la ingestión se duerme, los resultados en memoria se pierden | Volver a generar datos con el simulador o con la aplicación (*Generar datos*) |
+| 512 MB y CPU compartida | Scala tarda unos 25 s en arrancar | Ya está ajustado: `JAVA_OPTS=-Xmx256m -XX:+UseSerialGC`. Probado con 0,1 CPU y 512 MB: usa unos 90 MB y las 8 partidas de prueba coinciden con lo esperado |
+
+## Opciones de servidor (VM con Docker Compose)
 
 | Opción | Costo | Notas |
 |---|---|---|

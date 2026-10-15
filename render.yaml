@@ -1,0 +1,54 @@
+# Despliegue en Render (plan gratuito) con las imágenes que publica release.yml en GHCR.
+# Uso: render.com → New → Blueprint → elegir este repositorio → Apply.
+# Guía completa: docs/deployment.md, sección «Render».
+#
+# Limitaciones del plan gratuito:
+# - Cada servicio se duerme tras 15 min sin tráfico; la primera petición tarda alrededor de 1 minuto.
+# - Sin disco persistente: los resultados viven en memoria y se pierden cuando la ingestión se duerme.
+# - Los servicios gratuitos no reciben tráfico de la red privada de Render, así que Go llama a Scala
+#   por su URL pública.
+
+services:
+  - type: web
+    name: gamestats-analytics
+    runtime: image
+    image:
+      url: ghcr.io/kayy1y/gamestats-analytics:latest
+    plan: free
+    healthCheckPath: /health
+    envVars:
+      - key: HTTP_PORT
+        value: "8081"
+      - key: PORT
+        value: "8081"
+      - key: JAVA_OPTS
+        value: "-Xmx256m -XX:+UseSerialGC"
+
+  - type: web
+    name: gamestats-ingestion
+    runtime: image
+    image:
+      url: ghcr.io/kayy1y/gamestats-ingestion:latest
+    plan: free
+    healthCheckPath: /healthz
+    envVars:
+      - key: HTTP_ADDR
+        value: ":8080"
+      - key: PORT
+        value: "8080"
+      # URL pública del servicio Scala. Si Render le asignó otro subdominio, se corrige en
+      # Dashboard → gamestats-ingestion → Environment.
+      - key: ANALYTICS_URL
+        value: https://gamestats-analytics.onrender.com
+      # Render genera una clave aleatoria; se consulta en Dashboard → gamestats-ingestion → Environment.
+      - key: INGEST_API_KEY
+        generateValue: true
+      - key: MATCH_IDLE_TIMEOUT
+        value: 30s
+      # Scala puede estar dormido: se le da tiempo para despertar antes de reintentar.
+      - key: ANALYZE_TIMEOUT
+        value: 90s
+      - key: ANALYZE_MAX_RETRIES
+        value: "4"
+      - key: ANALYZE_BACKOFF_BASE
+        value: 2s

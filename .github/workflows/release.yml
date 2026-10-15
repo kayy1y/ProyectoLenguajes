@@ -53,3 +53,23 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha,scope=release-${{ matrix.image }}
           cache-to: type=gha,mode=max,scope=release-${{ matrix.image }}
+
+  render:
+    name: Redeploy on Render
+    needs: publish
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      # Opcional: si existen los secrets con los Deploy Hooks de Render, cada push a main
+      # vuelve a desplegar las imágenes recién publicadas. Sin secrets, el job no hace nada.
+      - name: Trigger Render deploy hooks
+        env:
+          HOOK_ANALYTICS: ${{ secrets.RENDER_DEPLOY_HOOK_ANALYTICS }}
+          HOOK_INGESTION: ${{ secrets.RENDER_DEPLOY_HOOK_INGESTION }}
+        run: |
+          if [ -z "$HOOK_ANALYTICS" ] && [ -z "$HOOK_INGESTION" ]; then
+            echo "No hay deploy hooks de Render configurados: se omite."
+            exit 0
+          fi
+          if [ -n "$HOOK_ANALYTICS" ]; then curl -fsS -X POST "$HOOK_ANALYTICS" > /dev/null && echo "analytics: redeploy solicitado"; fi
+          if [ -n "$HOOK_INGESTION" ]; then curl -fsS -X POST "$HOOK_INGESTION" > /dev/null && echo "ingestion: redeploy solicitado"; fi
