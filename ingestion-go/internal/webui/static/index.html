@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GameStats</title>
+<link rel="icon" href="/ui/icon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="/ui/style.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <img src="/ui/icon.svg" alt="" width="36" height="36">
+    <div>
+      <h1>GameStats</h1>
+      <p>Ingestión en Go · análisis en Scala</p>
+    </div>
+  </div>
+  <div class="conn">
+    <span id="conn" class="pill pill-muted">conectando…</span>
+    <form id="key-form" class="key" autocomplete="off">
+      <label for="key-input">Clave de API</label>
+      <input id="key-input" type="password" placeholder="Pega la clave para enviar datos" spellcheck="false">
+      <button type="submit" class="btn">Guardar</button>
+      <span id="key-state" class="hint"></span>
+    </form>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button role="tab" data-tab="matches" class="active">Partidas</button>
+  <button role="tab" data-tab="generate">Generar datos</button>
+  <button role="tab" data-tab="verify">Verificación</button>
+  <button role="tab" data-tab="send">Enviar evento</button>
+  <button role="tab" data-tab="rejections">Rechazos</button>
+  <button role="tab" data-tab="guide">Guía</button>
+</nav>
+
+<main>
+  <section id="tab-matches" class="tab active">
+    <div class="split">
+      <div class="col">
+        <div id="tiles" class="tiles"></div>
+        <div class="controls">
+          <input id="m-search" type="search" placeholder="Buscar partida…">
+          <select id="m-game"><option value="">Todos los juegos</option></select>
+          <select id="m-state"><option value="">Todos los estados</option></select>
+          <button id="m-refresh" class="btn">Actualizar</button>
+        </div>
+        <div class="table-wrap"><table id="m-table" class="table clickable"></table></div>
+        <p id="m-count" class="hint"></p>
+      </div>
+      <div class="col">
+        <div id="detail" class="panel"><p class="muted">Selecciona una partida para ver sus estadísticas.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-generate" class="tab">
+    <div class="panel">
+      <h2>Generar datos</h2>
+      <p class="muted">Envía partidas al sistema desde tu navegador. Cada ejecución usa identificadores nuevos, así que se puede repetir sin reiniciar nada.</p>
+      <div class="controls">
+        <select id="g-kind"></select>
+        <button id="g-run" class="btn btn-primary">Ejecutar</button>
+      </div>
+      <p id="g-desc" class="hint"></p>
+      <div id="g-out"></div>
+    </div>
+  </section>
+
+  <section id="tab-verify" class="tab">
+    <div class="panel">
+      <h2>Verificación</h2>
+      <p class="muted">Ejecuta la suite de 37 comprobaciones: 8 casos de prueba contra los resultados calculados a mano, 17 eventos inválidos con su error exacto y 12 comprobaciones del ciclo de vida de una partida.</p>
+      <div class="controls">
+        <button id="v-run" class="btn btn-primary">Ejecutar suite completa</button>
+        <button id="v-report" class="btn" disabled>Descargar informe (.md)</button>
+      </div>
+      <div id="v-out"></div>
+    </div>
+  </section>
+
+  <section id="tab-send" class="tab">
+    <div class="panel">
+      <h2>Enviar evento</h2>
+      <p class="muted">Elige una plantilla del contrato o escribe un evento a mano. Las plantillas inválidas muestran el error que el sistema debe devolver.</p>
+      <div class="controls">
+        <select id="s-template"><option value="">Plantilla…</option></select>
+        <button id="s-format" class="btn">Formatear</button>
+        <button id="s-fresh" class="btn" title="Cambia eventId y matchId para que no choque con envíos anteriores">IDs nuevos</button>
+        <button id="s-send" class="btn btn-primary">Enviar</button>
+      </div>
+      <p id="s-hint" class="hint"></p>
+      <textarea id="s-body" spellcheck="false" rows="16"></textarea>
+      <div id="s-out"></div>
+    </div>
+  </section>
+
+  <section id="tab-rejections" class="tab">
+    <div class="panel">
+      <div class="row-between">
+        <p id="r-count" class="muted"></p>
+        <select id="r-code"><option value="">Todos los códigos</option></select>
+      </div>
+      <div class="table-wrap"><table id="r-table" class="table"></table></div>
+    </div>
+  </section>
+
+  <section id="tab-guide" class="tab">
+    <div class="panel prose" id="guide"></div>
+  </section>
+</main>
+
+<footer class="foot">
+  API pública: <a href="/v1/matches">/v1/matches</a> · <a href="/v1/stats">/v1/stats</a> · <a href="/v1/rejections">/v1/rejections</a> · <a href="/healthz">/healthz</a>
+</footer>
+
+<script src="/ui/app.js"></script>
+</body>
+</html>

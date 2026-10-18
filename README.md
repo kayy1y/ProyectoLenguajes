@@ -20,9 +20,13 @@ No hace falta un videojuego real: un **simulador** genera partidas de dos juegos
                               └──▶ resultados consultables por HTTP (:8080)
 ```
 
+> **¿Solo quieres verlo funcionar?** Abre **https://gamestats-ingestion.onrender.com** en el navegador. Es la consola web del proyecto y no hace falta instalar nada. Las demás opciones están en [Formas de probar el sistema](#formas-de-probar-el-sistema).
+
 ---
 
 ## Contenido
+
+- [Formas de probar el sistema](#formas-de-probar-el-sistema) (empieza aquí)
 
 1. [Requisitos](#1-requisitos)
 2. [Instalar y arrancar en tu computadora](#2-instalar-y-arrancar-en-tu-computadora)
@@ -36,6 +40,94 @@ No hace falta un videojuego real: un **simulador** genera partidas de dos juegos
 10. [Estructura del repositorio](#10-estructura-del-repositorio)
 11. [Desarrollo, pruebas automáticas y CI/CD](#11-desarrollo-pruebas-automáticas-y-cicd)
 12. [Documentación técnica](#12-documentación-técnica)
+
+---
+
+## Formas de probar el sistema
+
+Hay cinco formas de comprobar que el sistema funciona. Todas usan el mismo sistema (Go recibe y agrupa los eventos, Scala calcula), así que se pueden combinar. Elige según lo que tengas instalado:
+
+| Opción | Qué necesitas | Dónde corre el sistema | Ideal para |
+|---|---|---|---|
+| **A. Consola web en Render** | Solo un navegador | En la nube (Render) | Probarlo en 5 minutos sin instalar nada |
+| **B. Consola web en tu computadora** | Docker | En tu computadora | La misma consola, sin depender de la nube |
+| **C. Aplicación de escritorio** | Go y un compilador de C, o el ejecutable de GitHub Actions | En tu computadora o en Render | Una ventana nativa con las mismas funciones |
+| **D. Terminal en tu computadora** | Docker, `curl` y `jq` | En tu computadora | Ver cada comando y cada respuesta JSON |
+| **E. Terminal contra Render, sin el código** | `curl` (y Docker si quieres la verificación completa) | En la nube (Render) | Probar la API desplegada desde cualquier terminal |
+
+La consola web (A y B) y la aplicación de escritorio (C) tienen las mismas seis pestañas: **Partidas, Generar datos, Verificación, Enviar evento, Rechazos y Guía**. Las dos usan solo la API pública del servicio Go; no calculan nada por su cuenta.
+
+### A. Consola web en Render (sin instalar nada)
+
+1. Abre **https://gamestats-ingestion.onrender.com**.
+   - Si nadie la usó en los últimos 15 minutos, la primera carga tarda alrededor de un minuto (el plan gratuito de Render duerme los servicios). Es normal: espera y no recargues.
+   - Arriba a la derecha debe aparecer **«● ingestión en línea»** en verde.
+2. Para **enviar datos**, pega la **clave de API** en el campo *Clave de API* (arriba a la derecha) y pulsa **Guardar**. La clave se entrega aparte, junto con la entrega del proyecto. Sin clave se puede mirar todo, pero no enviar eventos.
+3. Ve a **Generar datos**, elige **Escenario demo** y pulsa **Ejecutar**. Verás cada respuesta del sistema explicada: eventos aceptados, inválidos, un duplicado, un conflicto de `eventId` y un evento tardío.
+4. Ve a **Partidas** y haz clic en una partida: aparecen sus estadísticas por partida y por jugador, los patrones (racha o remontada) y los avisos de calidad de datos.
+5. Ve a **Verificación** y pulsa **Ejecutar suite completa**. Deben pasar las **37 comprobaciones**. Con **Descargar informe (.md)** obtienes la evidencia.
+
+> Los resultados en Render viven en memoria: si el servicio se durmió, la lista de partidas aparece vacía. Basta con volver a generar datos (paso 3). La primera vez que se analiza una partida, Scala puede tardar alrededor de un minuto en despertar; la consola lo indica y espera sola.
+
+### B. Consola web en tu computadora
+
+```bash
+git clone https://github.com/kayy1y/ProyectoLenguajes.git
+cd ProyectoLenguajes
+docker compose up -d --build --wait
+```
+
+Abre **http://localhost:8080** y sigue los pasos 3 a 5 de la opción A. En local no hace falta clave (salvo que configures `INGEST_API_KEY`, ver [sección 8](#8-configuración)).
+
+### C. Aplicación de escritorio
+
+Contra tu computadora (con el sistema levantado como en la opción B):
+
+```bash
+make gui-run
+```
+
+Contra Render (pon la clave real en lugar de `TU_CLAVE`):
+
+```bash
+./bin/gamestats-gui --target https://gamestats-ingestion.onrender.com --api-key TU_CLAVE
+```
+
+Cómo compilarla en cada sistema operativo, o bajar el ejecutable ya compilado, está en la [sección 4](#4-forma-1-probarlo-con-la-interfaz-gráfica).
+
+### D. Terminal en tu computadora
+
+Con el sistema levantado como en la opción B:
+
+```bash
+docker compose --profile demo run --rm simulator --fixture all --expect
+```
+
+Al final deben salir ocho líneas que empiezan con `ok`. Todos los comandos (ver resultados, escenario demo, enviar eventos a mano) están en la [sección 5](#5-forma-2-probarlo-desde-la-terminal).
+
+### E. Terminal contra Render, sin el código
+
+Primero despierta el servicio (puede tardar alrededor de un minuto) y comprueba que responde `{"status":"ok"}`:
+
+```bash
+curl -s https://gamestats-ingestion.onrender.com/healthz
+```
+
+Consultas que **no** necesitan clave:
+
+```bash
+curl -s https://gamestats-ingestion.onrender.com/v1/matches
+curl -s https://gamestats-ingestion.onrender.com/v1/stats
+curl -s https://gamestats-ingestion.onrender.com/v1/rejections
+```
+
+Verificación completa con Docker, sin clonar el repositorio (la imagen del simulador es pública y trae los casos de prueba). Pon la clave real en lugar de `TU_CLAVE`:
+
+```bash
+docker run --rm ghcr.io/kayy1y/gamestats-simulator:latest --target https://gamestats-ingestion.onrender.com --api-key TU_CLAVE --fixture all --expect --wait 240s
+```
+
+Debe terminar con ocho líneas `ok`. Después, `curl -s https://gamestats-ingestion.onrender.com/v1/matches` ya muestra las partidas.
 
 ---
 
@@ -91,7 +183,7 @@ El proyecto también está publicado en internet, para que puedas probarlo sin i
 
 | | |
 |---|---|
-| **Dirección** | https://gamestats-ingestion.onrender.com |
+| **Dirección** | https://gamestats-ingestion.onrender.com (al abrirla en el navegador muestra la consola web, ver [opción A](#a-consola-web-en-render-sin-instalar-nada)) |
 | **Comprobar que está vivo** | https://gamestats-ingestion.onrender.com/healthz (debe responder `{"status":"ok"}`) |
 | **Servicio de análisis (Scala)** | https://gamestats-analytics.onrender.com/health (debe responder `{"status":"ok"}`). Lo usa la ingestión; no hace falta llamarlo directamente |
 | **Plataforma** | [Render](https://render.com), plan gratuito |
@@ -102,6 +194,8 @@ El proyecto también está publicado en internet, para que puedas probarlo sin i
 - **Escribir requiere clave:** los eventos nuevos llevan la clave de API (`X-API-Key`). Pídela al equipo; las lecturas (`GET`) son públicas.
 
 ### Cómo probarla
+
+Con el navegador: abre https://gamestats-ingestion.onrender.com y sigue la [opción A](#a-consola-web-en-render-sin-instalar-nada).
 
 Con la aplicación de escritorio, apuntando a la nube:
 ```bash
@@ -374,6 +468,7 @@ Todo se consulta en el servicio Go, en el puerto 8080:
 | `GET /v1/rejections` | Últimos eventos rechazados y el motivo |
 | `GET /v1/stats` | Contadores internos |
 | `GET /healthz` | Comprobar que el servicio está vivo |
+| `GET /` | Consola web (página para el navegador; usa las rutas de arriba) |
 
 Ejemplo de evento:
 
@@ -441,7 +536,7 @@ Los valores por defecto sirven para probar en local. Para cambiarlos, copia `.en
 
 | Carpeta | Qué contiene |
 |---|---|
-| [`ingestion-go/`](ingestion-go/) | Servicio Go: validación con JSON Schema, una goroutine por partida, reintentos hacia Scala, almacenamiento de resultados y API |
+| [`ingestion-go/`](ingestion-go/) | Servicio Go: validación con JSON Schema, una goroutine por partida, reintentos hacia Scala, almacenamiento de resultados y API. También sirve la consola web (`internal/webui`) |
 | [`analytics-scala/`](analytics-scala/) | Servicio Scala 3: núcleo funcional común y un analizador por juego |
 | [`simulator/`](simulator/) | Simulador de partidas (CLI) y aplicación de escritorio (`cmd/gui`) |
 | [`contracts/`](contracts/) | La fuente de verdad compartida: esquemas JSON, ejemplos válidos e inválidos, partidas de prueba y sus resultados calculados a mano |
@@ -464,7 +559,7 @@ make fmt       # formatea el código Go
 
 | Suite | Cantidad | Comando |
 |---|---|---|
-| Go `ingestion-go` (unitarias y de sistema, con `-race`) | 19 | `cd ingestion-go && go test -race ./...` |
+| Go `ingestion-go` (unitarias, de sistema y de la consola web, con `-race`) | 22 | `cd ingestion-go && go test -race ./...` |
 | Go `simulator` (simulador y lógica de la app) | 14 | `cd simulator && go test -race ./...` |
 | Aplicación de escritorio | 2 | `cd simulator && go test -tags gui ./cmd/gui` |
 | Scala (resultados esperados, propiedades, HTTP) | 42 | `cd analytics-scala && sbt test` |
@@ -496,6 +591,7 @@ La matriz completa de casos está en [docs/testing.md](docs/testing.md).
 | [Estadísticas y patrones](docs/statistics.md) | Cómo se deriva cada métrica, con ejemplos |
 | [Decisiones de arquitectura](docs/decisions.md) | Por qué se eligió cada cosa y qué se descartó |
 | [Aplicación de escritorio](docs/gui.md) | Detalles de la interfaz gráfica |
+| [Consola web](docs/web.md) | La página que se abre en el navegador, local o en Render |
 | [Pruebas](docs/testing.md) | Matriz de casos de prueba |
 | [Deployment](docs/deployment.md) | Despliegue en un servidor |
 | [Guion de demo](docs/demo.md) | Demostración paso a paso |

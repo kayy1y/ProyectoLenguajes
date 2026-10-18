@@ -12,6 +12,10 @@ FROM gcr.io/distroless/static-debian12:nonroot
 WORKDIR /app
 COPY --from=build /out/ingestion /app/ingestion
 COPY contracts/schemas /app/contracts/schemas
+# Casos de prueba y ejemplos para la consola web (/): solo se leen, no afectan la ingestión.
+COPY contracts/fixtures /app/contracts/fixtures
+COPY contracts/expected /app/contracts/expected
+COPY contracts/examples /app/contracts/examples
 # Directorio de RESULTS_DIR con dueño nonroot: el volumen hereda estos permisos.
 COPY --from=build --chown=nonroot:nonroot /out/data /data
 ENV HTTP_ADDR=:8080 \

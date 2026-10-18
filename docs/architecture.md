@@ -29,6 +29,7 @@ flowchart LR
 |---|---|---|---|
 | `simulator/` | — | Produce eventos de partidas y juegos en paralelo, incluidos casos especiales | Calcular estadísticas |
 | `simulator/cmd/gui` | — | Aplicación de escritorio para ver resultados, generar datos y verificar (ver [gui.md](gui.md)); corre en la máquina del evaluador | Participar en el análisis; solo usa la API pública |
+| `ingestion-go/internal/webui` | — | Consola web con las mismas funciones que la aplicación de escritorio (ver [web.md](web.md)); Go solo entrega los archivos y el JavaScript corre en el navegador | Participar en el análisis; solo usa la API pública |
 | `ingestion-go/` | Imperativo y concurrente | Recibe, valida, deduplica, agrupa por partida, controla el ciclo de vida, coordina el análisis, guarda y expone los resultados | **Calcular** métricas o patrones de juego |
 | `analytics-scala/` | Funcional | Ordena, tipa, aplica reglas semánticas, calcula métricas y detecta patrones | Guardar estado, coordinar concurrencia, recibir eventos sueltos |
 | `contracts/` | — | Fuente de verdad: esquemas, ejemplos, fixtures y resultados esperados | — |

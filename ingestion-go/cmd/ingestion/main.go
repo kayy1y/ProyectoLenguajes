@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -23,6 +24,7 @@ import (
 	"gamestats/ingestion-go/internal/obs"
 	"gamestats/ingestion-go/internal/store"
 	"gamestats/ingestion-go/internal/validation"
+	"gamestats/ingestion-go/internal/webui"
 )
 
 func main() {
@@ -80,13 +82,16 @@ func run(cfg config.Config, log *slog.Logger) error {
 	poolDone := make(chan struct{})
 	go func() { pool.Run(analysisCtx); close(poolDone) }()
 
+	api := httpapi.New(httpapi.Deps{
+		Validator: validator, Dispatcher: disp, Pool: pool, Store: st,
+		Counters: &obs.Counters{}, Rejections: obs.NewRejections(100),
+		EnqueueTimeout: cfg.EnqueueTimeout, APIKey: cfg.APIKey, Log: log,
+	}).Handler()
 	srv := &http.Server{
 		Addr: cfg.HTTPAddr,
-		Handler: httpapi.New(httpapi.Deps{
-			Validator: validator, Dispatcher: disp, Pool: pool, Store: st,
-			Counters: &obs.Counters{}, Rejections: obs.NewRejections(100),
-			EnqueueTimeout: cfg.EnqueueTimeout, APIKey: cfg.APIKey, Log: log,
-		}).Handler(),
+		// La consola web (/ y /ui/) vive junto a la API y solo usa sus rutas públicas.
+		// Lee los casos de prueba de la carpeta contracts/ que contiene SCHEMAS_DIR.
+		Handler:           webui.Mount(api, filepath.Dir(filepath.Clean(cfg.SchemasDir))),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
 	serveErr := make(chan error, 1)

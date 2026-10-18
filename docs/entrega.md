@@ -7,7 +7,7 @@ Esta página responde una pregunta: **¿dónde está cada cosa que pide el enunc
 | | |
 |---|---|
 | **Repositorio** | https://github.com/kayy1y/ProyectoLenguajes |
-| **Versión desplegada** | https://gamestats-ingestion.onrender.com (comprobar con `/healthz`) |
+| **Versión desplegada** | https://gamestats-ingestion.onrender.com: en el navegador abre la consola web (comprobar con `/healthz`) |
 | **Servicio de análisis** | https://gamestats-analytics.onrender.com/health |
 | **Pruebas automáticas (CI)** | https://github.com/kayy1y/ProyectoLenguajes/actions |
 | **Imágenes Docker publicadas** | https://github.com/kayy1y?tab=packages |
@@ -30,7 +30,7 @@ Esta página responde una pregunta: **¿dónde está cada cosa que pide el enunc
 | Pipeline CI/CD | [`.github/workflows/`](../.github/workflows/): `ci.yml`, `release.yml` y `deploy.yml` |
 | Documentación de instalación y ejecución | [`README.md`](../README.md) |
 | Documentación de despliegue | [`deployment.md`](deployment.md) y [`render.yaml`](../render.yaml) |
-| Demostración funcional | [`demo.md`](demo.md), [`scripts/demo.sh`](../scripts/demo.sh), la aplicación de escritorio y la versión desplegada |
+| Demostración funcional | [`demo.md`](demo.md), [`scripts/demo.sh`](../scripts/demo.sh), la aplicación de escritorio, la [consola web](web.md) y la versión desplegada |
 
 ## Otros documentos que ayudan a entender el diseño
 
@@ -42,16 +42,19 @@ Esta página responde una pregunta: **¿dónde está cada cosa que pide el enunc
 | [`defense.md`](defense.md) | Imperativo frente a funcional, y dónde verlo en el código |
 | [`testing.md`](testing.md) | Los casos de prueba y cómo correrlos |
 | [`gui.md`](gui.md) | La aplicación de escritorio para probar el sistema |
+| [`web.md`](web.md) | La consola web, la misma herramienta en el navegador (local o en Render) |
 
 ## Probarlo en cinco minutos
 
-**Sin instalar nada**, con la versión en la nube:
+**Sin instalar nada**, con la versión en la nube: abre https://gamestats-ingestion.onrender.com en el navegador. Es la [consola web](web.md): pega la clave de API arriba a la derecha, ve a **Generar datos → Escenario demo → Ejecutar**, mira las partidas en **Partidas** y ejecuta la **Verificación** (37 comprobaciones).
+
+Para comprobar solo que está vivo:
 
 ```bash
 curl -s https://gamestats-ingestion.onrender.com/healthz
 ```
 
-Debe responder `{"status":"ok"}`.
+Debe responder `{"status":"ok"}`. Todas las formas de probarlo están en el README, sección [Formas de probar el sistema](../README.md#formas-de-probar-el-sistema).
 
 **En tu computadora**, solo con Docker:
 
