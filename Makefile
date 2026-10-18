@@ -1,4 +1,4 @@
-.PHONY: help build test test-go test-scala up down demo gui gui-run e2e results fmt
+.PHONY: help build test test-go test-scala up down demo gui gui-run gui-check e2e results fmt
 
 GAME ?= arena-combat
 MATCH ?= match-a1
@@ -37,6 +37,10 @@ gui:
 
 gui-run: gui
 	./bin/gamestats-gui
+
+# Revisa que la interfaz compile sin compilador de C (la compila para WebAssembly).
+gui-check:
+	cd simulator && GOOS=js GOARCH=wasm go vet -tags gui ./cmd/gui
 
 e2e:
 	./tests/e2e/e2e.sh
