@@ -4,6 +4,7 @@ package main
 
 import (
 	"fmt"
+	"slices"
 	"time"
 
 	"fyne.io/fyne/v2"
@@ -15,22 +16,41 @@ import (
 
 // rejectionsTab: últimos eventos rechazados, con su código y campo.
 func (u *ui) rejectionsTab() fyne.CanvasObject {
-	var rows []lab.RejectionRow
+	const allCodes = "Todos los códigos"
+	var all, rows []lab.RejectionRow
 	list := widget.NewList(
 		func() int { return len(rows) },
 		func() fyne.CanvasObject {
-			return widget.NewLabelWithStyle("", fyne.TextAlignLeading, fyne.TextStyle{Monospace: true})
+			code := container.NewGridWrap(fyne.NewSize(240, 34), newBadge("", widget.MediumImportance))
+			return container.NewBorder(nil, nil, code, nil,
+				widget.NewLabelWithStyle("", fyne.TextAlignLeading, fyne.TextStyle{Monospace: true}))
 		},
 		func(i widget.ListItemID, o fyne.CanvasObject) {
 			r := rows[i]
-			t, err := time.Parse(time.RFC3339Nano, r.At)
+			c := o.(*fyne.Container)
 			at := r.At
-			if err == nil {
+			if t, err := time.Parse(time.RFC3339Nano, r.At); err == nil {
 				at = t.Local().Format("15:04:05")
 			}
-			o.(*widget.Label).SetText(fmt.Sprintf("%s  %-24s %-18s %s/%s  %s  %s", at, r.Code, dash(r.Field), dash(r.GameID), dash(r.MatchID), dash(r.EventID), r.Message))
+			c.Objects[0].(*widget.Label).SetText(fmt.Sprintf("%s  %-18s %s/%s  %s  %s", at, dash(r.Field), dash(r.GameID), dash(r.MatchID), dash(r.EventID), r.Message))
+			c.Objects[1].(*fyne.Container).Objects[0].(*badge).Set(" "+r.Code+" ", codeImportance(r.Code))
 		})
+
+	filter := widget.NewSelect([]string{allCodes}, nil)
 	info := widget.NewLabel("")
+	apply := func() {
+		rows = rows[:0]
+		for _, r := range all {
+			if filter.Selected == allCodes || r.Code == filter.Selected {
+				rows = append(rows, r)
+			}
+		}
+		info.SetText(fmt.Sprintf("%d de %d rechazos recientes (inválidos, tardíos, conflictos…). Se actualiza cada 3 s.", len(rows), len(all)))
+		list.Refresh()
+	}
+	filter.OnChanged = func(string) { apply() }
+	filter.SetSelected(allCodes)
+
 	refresh := func() {
 		ctx, cancel := ctx5()
 		rs, err := u.lab.Rejections(ctx)
@@ -40,11 +60,27 @@ func (u *ui) rejectionsTab() fyne.CanvasObject {
 				info.SetText("No se pudo consultar: " + err.Error())
 				return
 			}
-			rows = rs
-			info.SetText(fmt.Sprintf("%d rechazos recientes (inválidos, tardíos, conflictos…). Se actualiza cada 3 s.", len(rs)))
-			list.Refresh()
+			all = rs
+			codes := []string{allCodes}
+			for _, r := range rs {
+				if !slices.Contains(codes, r.Code) {
+					codes = append(codes, r.Code)
+				}
+			}
+			filter.Options = codes
+			apply()
 		})
 	}
 	go every(3*time.Second, refresh)
-	return container.NewBorder(container.NewPadded(info), nil, nil, nil, list)
+	top := container.NewBorder(nil, nil, nil, container.NewGridWrap(fyne.NewSize(240, filter.MinSize().Height), filter), info)
+	return container.NewBorder(container.NewPadded(top), nil, nil, nil, list)
+}
+
+// codeImportance: los rechazos por momento o duplicado son avisos; el resto, errores.
+func codeImportance(code string) widget.Importance {
+	switch code {
+	case "LATE_EVENT", "MATCH_CLOSED", "DUPLICATE_ID_CONFLICT", "MATCH_ALREADY_STARTED", "MATCH_ALREADY_FINISHED":
+		return widget.WarningImportance
+	}
+	return widget.DangerImportance
 }
