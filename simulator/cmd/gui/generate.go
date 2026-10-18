@@ -136,6 +136,11 @@ func (u *ui) generateTab() fyne.CanvasObject {
 			drawRun(v, progress, state, out)
 			if v.State != "running" {
 				run.Enable()
+				msg := fmt.Sprintf("Terminado: %d eventos enviados.", v.Sent)
+				if v.Error != "" {
+					msg = "Terminó con error: " + v.Error
+				}
+				fyne.CurrentApp().SendNotification(fyne.NewNotification("GameStats · Generar datos", msg))
 			}
 		})
 	})

@@ -58,6 +58,7 @@ func (u *ui) verifyTab() fyne.CanvasObject {
 		go u.follow(j, 500*time.Millisecond, func(v *lab.Job) {
 			drawChecks(v, summary, results)
 			if v.State != "running" {
+				fyne.CurrentApp().SendNotification(fyne.NewNotification("GameStats · Verificación", summary.Text))
 				progress.Stop()
 				progress.Hide()
 				run.Enable()
