@@ -3,6 +3,7 @@
 package main
 
 import (
+	"cmp"
 	"fmt"
 	"time"
 
@@ -95,6 +96,7 @@ func drawChecks(j *lab.Job, summary *widget.Label, box *fyne.Container) {
 	summary.Refresh()
 
 	box.RemoveAll()
+	box.Add(groupSummary(j))
 	group := ""
 	for _, c := range j.Checks {
 		if c.Group != group {
@@ -106,8 +108,7 @@ func drawChecks(j *lab.Job, summary *widget.Label, box *fyne.Container) {
 		if c.Pass {
 			verdict = "PASS"
 		}
-		v := widget.NewLabelWithStyle(verdict, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-		v.Importance = statusImportance(verdict)
+		v := container.NewVBox(newBadge(" "+verdict+" ", statusImportance(verdict)))
 		text := c.Name
 		if c.Detail != "" {
 			text += " — " + c.Detail
@@ -130,4 +131,29 @@ func drawChecks(j *lab.Job, summary *widget.Label, box *fyne.Container) {
 		}
 	}
 	box.Refresh()
+}
+
+// groupSummary resume cada grupo de comprobaciones en un badge: «Casos de prueba 8/8».
+func groupSummary(j *lab.Job) fyne.CanvasObject {
+	var groups []string
+	pass, total := map[string]int{}, map[string]int{}
+	for _, c := range j.Checks {
+		if total[c.Group] == 0 {
+			groups = append(groups, c.Group)
+		}
+		total[c.Group]++
+		if c.Pass {
+			pass[c.Group]++
+		}
+	}
+	names := map[string]string{"fixtures": "Casos de prueba", "inválidos": "Eventos inválidos", "comportamiento": "Comportamiento"}
+	row := container.NewHBox()
+	for _, g := range groups {
+		imp := widget.SuccessImportance
+		if pass[g] < total[g] {
+			imp = widget.DangerImportance
+		}
+		row.Add(newBadge(fmt.Sprintf(" %s %d/%d ", cmp.Or(names[g], g), pass[g], total[g]), imp))
+	}
+	return row
 }
