@@ -21,7 +21,9 @@ func (u *ui) matchesTab() fyne.CanvasObject {
 	var all, rows []lab.MatchSummary
 	filter := ""
 	headers := []string{"Juego", "Partida", "Estado", "Completitud", "Eventos"}
-	widths := []float32{110, 120, 135, 140, 60}
+	sortKeys := []string{"game", "match", "status", "completeness", "events"}
+	widths := []float32{110, 120, 135, 140, 75}
+	sortCol, sortDesc := -1, true // -1: las actualizadas más recientemente primero
 
 	detail := container.NewVBox(wrapped("Selecciona una partida para ver sus estadísticas."))
 	var selected *lab.MatchSummary
@@ -65,11 +67,38 @@ func (u *ui) matchesTab() fyne.CanvasObject {
 			}
 			c.Refresh() // vuelve a acomodar la celda si el icono se mostró u ocultó
 		})
+	var apply func()
+	// Encabezados clicables: un clic ordena por esa columna, otro invierte el orden.
 	table.ShowHeaderRow = true
-	table.CreateHeader = func() fyne.CanvasObject { return bold("") }
+	table.CreateHeader = func() fyne.CanvasObject {
+		b := widget.NewButton("", nil)
+		b.Importance = widget.LowImportance
+		b.Alignment = widget.ButtonAlignLeading
+		b.IconPlacement = widget.ButtonIconTrailingText
+		return b
+	}
 	table.UpdateHeader = func(id widget.TableCellID, o fyne.CanvasObject) {
-		if id.Col >= 0 {
-			o.(*widget.Label).SetText(headers[id.Col])
+		if id.Col < 0 {
+			return
+		}
+		b, col := o.(*widget.Button), id.Col
+		b.SetText(headers[col])
+		switch {
+		case col != sortCol:
+			b.SetIcon(nil)
+		case sortDesc:
+			b.SetIcon(theme.MoveDownIcon())
+		default:
+			b.SetIcon(theme.MoveUpIcon())
+		}
+		b.OnTapped = func() {
+			if sortCol == col {
+				sortDesc = !sortDesc
+			} else {
+				sortCol, sortDesc = col, false
+			}
+			table.UnselectAll()
+			apply()
 		}
 	}
 	for i, w := range widths {
@@ -96,13 +125,18 @@ func (u *ui) matchesTab() fyne.CanvasObject {
 	problem.Truncation = fyne.TextTruncateEllipsis
 	problem.Importance = widget.DangerImportance
 	problem.Hide()
-	apply := func() {
+	apply = func() {
 		rows = rows[:0]
 		for _, m := range all {
 			if filter == "" || strings.Contains(strings.ToLower(m.MatchID+" "+m.GameID+" "+m.Status), filter) {
 				rows = append(rows, m)
 			}
 		}
+		key := ""
+		if sortCol >= 0 {
+			key = sortKeys[sortCol]
+		}
+		lab.SortMatches(rows, key, sortDesc)
 		table.Refresh()
 	}
 	search := widget.NewEntry()

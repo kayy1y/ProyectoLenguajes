@@ -33,6 +33,37 @@ func TestColumnsComeFromDataForAnyGame(t *testing.T) {
 	}
 }
 
+func TestSortMatches(t *testing.T) {
+	ms := []MatchSummary{
+		{GameID: "street-racing", MatchID: "r1", EventCount: 21, UpdatedAt: "2026-10-17T10:00:00Z"},
+		{GameID: "arena-combat", MatchID: "a2", EventCount: 7, UpdatedAt: "2026-10-17T10:05:00.5Z"},
+		{GameID: "arena-combat", MatchID: "a1", EventCount: 18, UpdatedAt: "2026-10-17T10:01:00Z"},
+	}
+	ids := func() string {
+		var s []string
+		for _, m := range ms {
+			s = append(s, m.MatchID)
+		}
+		return strings.Join(s, ",")
+	}
+	for _, c := range []struct {
+		col  string
+		desc bool
+		want string
+	}{
+		{"", true, "a2,a1,r1"},
+		{"events", false, "a2,a1,r1"},
+		{"events", true, "r1,a1,a2"},
+		{"game", false, "a1,a2,r1"},
+		{"match", true, "r1,a2,a1"},
+	} {
+		SortMatches(ms, c.col, c.desc)
+		if got := ids(); got != c.want {
+			t.Errorf("SortMatches(%q, desc=%v) = %s, want %s", c.col, c.desc, got, c.want)
+		}
+	}
+}
+
 func TestPatternExplainAndReport(t *testing.T) {
 	p := Pattern(map[string]any{"type": "KILL_STREAK", "playerId": "p1", "length": float64(3)})
 	if p != "KILL_STREAK — length: 3 · player id: p1" {
