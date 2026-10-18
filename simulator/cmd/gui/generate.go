@@ -183,12 +183,3 @@ func drawRun(j *lab.Job, progress *widget.ProgressBar, state *widget.Label, out 
 	}
 	out.Refresh()
 }
-
-// short recorta un texto largo para que quepa en una línea.
-func short(s string, n int) string {
-	r := []rune(s)
-	if len(r) <= n {
-		return s
-	}
-	return string(r[:n-1]) + "…"
-}

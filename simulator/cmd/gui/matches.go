@@ -133,13 +133,6 @@ func summaryLine(st map[string]any, n int) string {
 		n, get("accepted"), get("rejected"), get("duplicates"), get("late"))
 }
 
-func dash(s string) string {
-	if s == "" {
-		return "—"
-	}
-	return s
-}
-
 // fillDetail dibuja el resultado sin conocer el juego: las columnas salen de metrics.
 func (u *ui) fillDetail(box *fyne.Container, m lab.MatchSummary, r *lab.MatchResult, status int, err error) {
 	box.RemoveAll()

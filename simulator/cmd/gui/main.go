@@ -114,31 +114,3 @@ func env(key, def string) string {
 	}
 	return def
 }
-
-func bold(s string) *widget.Label {
-	return widget.NewLabelWithStyle(s, fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-}
-
-func wrapped(s string) *widget.Label {
-	l := widget.NewLabel(s)
-	l.Wrapping = fyne.TextWrapWord
-	return l
-}
-
-func statusImportance(s string) widget.Importance {
-	switch s {
-	case "ANALYZED", "COMPLETE", "PASS":
-		return widget.SuccessImportance
-	case "FAILED", "FAIL", "TIMEOUT":
-		return widget.DangerImportance
-	case "RETRYING", "INCOMPLETE":
-		return widget.WarningImportance
-	}
-	return widget.MediumImportance
-}
-
-func addAll(c *fyne.Container, objs ...fyne.CanvasObject) {
-	for _, o := range objs {
-		c.Add(o)
-	}
-}
