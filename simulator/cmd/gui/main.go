@@ -73,6 +73,7 @@ func build(a fyne.App, l *lab.Lab, cat *lab.Catalog, target string) (fyne.Window
 		container.NewTabItemWithIcon("Guía", theme.HelpIcon(), u.guideTab()),
 	)
 	w.SetContent(container.NewBorder(u.header(target), nil, nil, nil, tabs))
+	u.mainMenu(tabs)
 	w.Resize(fyne.NewSize(1180, 760))
 	return w, tabs
 }
