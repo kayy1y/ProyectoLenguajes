@@ -78,7 +78,11 @@ func (u *ui) matchesTab() fyne.CanvasObject {
 		}
 	}
 
-	stats := widget.NewLabel("")
+	kpis, updateKPIs := summaryTiles()
+	problem := widget.NewLabel("")
+	problem.Truncation = fyne.TextTruncateEllipsis
+	problem.Importance = widget.DangerImportance
+	problem.Hide()
 	apply := func() {
 		rows = rows[:0]
 		for _, m := range all {
@@ -99,12 +103,14 @@ func (u *ui) matchesTab() fyne.CanvasObject {
 		cancel()
 		fyne.Do(func() {
 			if err != nil {
-				stats.SetText("No se pudo consultar la ingestión: " + err.Error())
+				problem.SetText("No se pudo consultar la ingestión: " + err.Error())
+				problem.Show()
 				return
 			}
+			problem.Hide()
 			all = ms
 			apply()
-			stats.SetText(summaryLine(st, len(ms)))
+			updateKPIs(st, len(ms))
 		})
 	}
 	refreshBtn := widget.NewButtonWithIcon("Actualizar", theme.ViewRefreshIcon(), func() {
@@ -115,22 +121,39 @@ func (u *ui) matchesTab() fyne.CanvasObject {
 	})
 	go every(3*time.Second, refresh)
 
-	left := container.NewBorder(container.NewVBox(stats, container.NewBorder(nil, nil, nil, refreshBtn, search)), nil, nil, nil, table)
+	top := container.NewVBox(kpis, problem, container.NewBorder(nil, nil, nil, refreshBtn, search))
+	left := container.NewBorder(top, nil, nil, nil, table)
 	split := container.NewHSplit(left, container.NewVScroll(container.NewPadded(detail)))
 	split.Offset = 0.5
 	return split
 }
 
-func summaryLine(st map[string]any, n int) string {
-	ev, _ := st["events"].(map[string]any)
-	get := func(k string) string {
-		if ev == nil {
-			return "—"
-		}
-		return lab.Value(ev[k])
+// summaryTiles son las tarjetas con los totales de /v1/stats; la función que
+// devuelve las actualiza.
+func summaryTiles() (fyne.CanvasObject, func(st map[string]any, matches int)) {
+	keys := []string{"accepted", "rejected", "duplicates", "late"}
+	matches := newStatTile("Partidas", widget.HighImportance)
+	tiles := []*statTile{
+		newStatTile("Aceptados", widget.SuccessImportance),
+		newStatTile("Rechazados", widget.DangerImportance),
+		newStatTile("Duplicados", widget.WarningImportance),
+		newStatTile("Tardíos", widget.WarningImportance),
 	}
-	return fmt.Sprintf("%d partidas · aceptados %s · rechazados %s · duplicados %s · tardíos %s",
-		n, get("accepted"), get("rejected"), get("duplicates"), get("late"))
+	grid := container.NewGridWithColumns(len(tiles)+1, matches)
+	for _, t := range tiles {
+		grid.Add(t)
+	}
+	return grid, func(st map[string]any, n int) {
+		matches.SetValue(fmt.Sprint(n))
+		ev, _ := st["events"].(map[string]any)
+		for i, k := range keys {
+			v := "—"
+			if ev != nil {
+				v = lab.Value(ev[k])
+			}
+			tiles[i].SetValue(v)
+		}
+	}
 }
 
 // fillDetail dibuja el resultado sin conocer el juego: las columnas salen de metrics.

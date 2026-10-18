@@ -8,6 +8,7 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
+	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
 )
@@ -54,6 +55,39 @@ func (b *badge) applyColors() {
 	b.label.Importance = b.imp
 	b.bg.Refresh()
 	b.label.Refresh()
+}
+
+// statTile es una tarjeta con un número grande y su descripción debajo.
+type statTile struct {
+	widget.BaseWidget
+	bg      *canvas.Rectangle
+	value   *widget.Label
+	caption *widget.Label
+}
+
+func newStatTile(caption string, imp widget.Importance) *statTile {
+	t := &statTile{bg: canvas.NewRectangle(color.Transparent), caption: widget.NewLabel(caption),
+		value: widget.NewLabelWithStyle("—", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})}
+	t.value.SizeName = theme.SizeNameHeadingText
+	t.value.Importance = imp
+	t.caption.SizeName = theme.SizeNameCaptionText
+	t.bg.CornerRadius = 10
+	t.ExtendBaseWidget(t)
+	return t
+}
+
+// SetValue cambia el número de la tarjeta.
+func (t *statTile) SetValue(v string) { t.value.SetText(v) }
+
+func (t *statTile) CreateRenderer() fyne.WidgetRenderer {
+	t.bg.FillColor = theme.Color(theme.ColorNameHeaderBackground)
+	body := container.New(layout.NewCustomPaddedVBoxLayout(-12), t.value, t.caption)
+	return widget.NewSimpleRenderer(container.NewStack(t.bg, container.NewPadded(body)))
+}
+
+func (t *statTile) Refresh() {
+	t.bg.FillColor = theme.Color(theme.ColorNameHeaderBackground)
+	t.BaseWidget.Refresh()
 }
 
 // importanceColor es el color del tema que corresponde a una importancia.
