@@ -57,12 +57,18 @@ Hay cinco formas de comprobar que el sistema funciona. Todas usan el mismo siste
 
 La consola web (A y B) y la aplicación de escritorio (C) tienen las mismas seis pestañas: **Partidas, Generar datos, Verificación, Enviar evento, Rechazos y Guía**. Las dos usan solo la API pública del servicio Go; no calculan nada por su cuenta.
 
+> **Clave de API (solo para enviar datos a Render).** La clave está en el **documento adjunto a la entrega** («Links e información importante», en el campo *Api key para prueba de despliegue*). No está en este repositorio porque el repositorio es público.
+>
+> En los comandos de este README aparece como **`<clave>`**. Reemplaza `<clave>` completo, **incluidos los signos `<` y `>`**, por la clave del documento. Por ejemplo, `--api-key <clave>` queda como `--api-key aBc123...=`.
+>
+> Para **consultar** (ver partidas, estadísticas o rechazos) no hace falta clave.
+
 ### A. Consola web en Render (sin instalar nada)
 
 1. Abre **https://gamestats-ingestion.onrender.com**.
    - Si nadie la usó en los últimos 15 minutos, la primera carga tarda alrededor de un minuto (el plan gratuito de Render duerme los servicios). Es normal: espera y no recargues.
    - Arriba a la derecha debe aparecer **«● ingestión en línea»** en verde.
-2. Para **enviar datos**, pega la **clave de API** en el campo *Clave de API* (arriba a la derecha) y pulsa **Guardar**. La clave se entrega aparte, junto con la entrega del proyecto. Sin clave se puede mirar todo, pero no enviar eventos.
+2. Para **enviar datos**, copia la clave del **documento adjunto a la entrega**, pégala en el campo *Clave de API* (arriba a la derecha) y pulsa **Guardar**. Debe aparecer «clave guardada» en verde. Sin clave se puede mirar todo, pero no enviar eventos.
 3. Ve a **Generar datos**, elige **Escenario demo** y pulsa **Ejecutar**. Verás cada respuesta del sistema explicada: eventos aceptados, inválidos, un duplicado, un conflicto de `eventId` y un evento tardío.
 4. Ve a **Partidas** y haz clic en una partida: aparecen sus estadísticas por partida y por jugador, los patrones (racha o remontada) y los avisos de calidad de datos.
 5. Ve a **Verificación** y pulsa **Ejecutar suite completa**. Deben pasar las **37 comprobaciones**. Con **Descargar informe (.md)** obtienes la evidencia.
@@ -87,10 +93,10 @@ Contra tu computadora (con el sistema levantado como en la opción B):
 make gui-run
 ```
 
-Contra Render (pon la clave real en lugar de `TU_CLAVE`):
+Contra Render (cambia `<clave>` por la clave del documento adjunto):
 
 ```bash
-./bin/gamestats-gui --target https://gamestats-ingestion.onrender.com --api-key TU_CLAVE
+./bin/gamestats-gui --target https://gamestats-ingestion.onrender.com --api-key <clave>
 ```
 
 Cómo compilarla en cada sistema operativo, o bajar el ejecutable ya compilado, está en la [sección 4](#4-forma-1-probarlo-con-la-interfaz-gráfica).
@@ -107,27 +113,78 @@ Al final deben salir ocho líneas que empiezan con `ok`. Todos los comandos (ver
 
 ### E. Terminal contra Render, sin el código
 
-Primero despierta el servicio (puede tardar alrededor de un minuto) y comprueba que responde `{"status":"ok"}`:
+Sirve desde cualquier terminal (macOS, Linux o Windows con `curl`), sin clonar el repositorio. **Pega los comandos de a uno**, no todos juntos.
+
+**Paso 1. Despertar el servicio.** Puede tardar alrededor de un minuto; debe responder `{"status":"ok"}`:
 
 ```bash
 curl -s https://gamestats-ingestion.onrender.com/healthz
 ```
 
-Consultas que **no** necesitan clave:
+**Paso 2. Consultas que no necesitan clave:**
 
 ```bash
 curl -s https://gamestats-ingestion.onrender.com/v1/matches
+```
+```bash
 curl -s https://gamestats-ingestion.onrender.com/v1/stats
+```
+```bash
 curl -s https://gamestats-ingestion.onrender.com/v1/rejections
 ```
 
-Verificación completa con Docker, sin clonar el repositorio (la imagen del simulador es pública y trae los casos de prueba). Pon la clave real en lugar de `TU_CLAVE`:
+Si `/v1/matches` responde `[]`, todavía no hay partidas (o el servicio se durmió y se borraron). Genera datos con el paso 3 o el paso 4.
+
+**Paso 3. Enviar una partida con `curl`** (necesita la clave). Primero guarda la clave en una variable, cambiando `<clave>` por la clave del documento adjunto. Los comandos siguientes la usan como `$KEY`, así que solo se escribe una vez:
 
 ```bash
-docker run --rm ghcr.io/kayy1y/gamestats-simulator:latest --target https://gamestats-ingestion.onrender.com --api-key TU_CLAVE --fixture all --expect --wait 240s
+KEY='<clave>'
+```
+
+Después envía los seis eventos de la partida, de a uno. Cada uno debe responder `{"status":"ACCEPTED",...}`:
+
+```bash
+curl -s -X POST https://gamestats-ingestion.onrender.com/v1/events -H "Content-Type: application/json" -H "X-API-Key: $KEY" -d '{"eventId":"profe1-1","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-profe1","type":"MATCH_STARTED","seq":1,"timestamp":"2026-10-01T15:00:00Z","data":{"map":"dust"}}'
+```
+```bash
+curl -s -X POST https://gamestats-ingestion.onrender.com/v1/events -H "Content-Type: application/json" -H "X-API-Key: $KEY" -d '{"eventId":"profe1-2","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-profe1","type":"PLAYER_JOINED","seq":2,"timestamp":"2026-10-01T15:00:01Z","playerId":"p1","data":{}}'
+```
+```bash
+curl -s -X POST https://gamestats-ingestion.onrender.com/v1/events -H "Content-Type: application/json" -H "X-API-Key: $KEY" -d '{"eventId":"profe1-3","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-profe1","type":"PLAYER_JOINED","seq":3,"timestamp":"2026-10-01T15:00:01Z","playerId":"p2","data":{}}'
+```
+```bash
+curl -s -X POST https://gamestats-ingestion.onrender.com/v1/events -H "Content-Type: application/json" -H "X-API-Key: $KEY" -d '{"eventId":"profe1-4","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-profe1","type":"ATTACK","seq":4,"timestamp":"2026-10-01T15:00:05Z","playerId":"p1","data":{"targetPlayerId":"p2","weapon":"rifle","hit":true,"damage":50}}'
+```
+```bash
+curl -s -X POST https://gamestats-ingestion.onrender.com/v1/events -H "Content-Type: application/json" -H "X-API-Key: $KEY" -d '{"eventId":"profe1-5","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-profe1","type":"ELIMINATION","seq":5,"timestamp":"2026-10-01T15:00:07Z","playerId":"p1","data":{"victimPlayerId":"p2","weapon":"rifle"}}'
+```
+```bash
+curl -s -X POST https://gamestats-ingestion.onrender.com/v1/events -H "Content-Type: application/json" -H "X-API-Key: $KEY" -d '{"eventId":"profe1-6","gameId":"arena-combat","gameVersion":"1.0","matchId":"match-profe1","type":"MATCH_FINISHED","seq":6,"timestamp":"2026-10-01T15:00:30Z","data":{"reason":"COMPLETED"}}'
+```
+
+Unos segundos después, mira el resultado que calculó Scala (no necesita clave). Si dice `ANALYZING`, espera y repítelo; la primera vez Scala puede tardar alrededor de un minuto en despertar:
+
+```bash
+curl -s https://gamestats-ingestion.onrender.com/v1/games/arena-combat/matches/match-profe1/results
+```
+
+Debe mostrar `"status":"ANALYZED"`, y `p1` con 1 ataque, 1 acierto, 50 de daño y 1 eliminación.
+
+| Si responde… | Significa |
+|---|---|
+| `401` o `"code":"UNAUTHORIZED"` | La clave no se guardó bien. Repite `KEY='<clave>'` con la clave del documento, sin los signos `<` `>` |
+| `409` con `LATE_EVENT` o `MATCH_CLOSED` | Esa partida ya se cerró y no se reabre. Cambia `profe1` por `profe2` en todos los comandos y repite |
+| `200` con `DUPLICATE` | Ese evento ya se había enviado; el sistema lo ignora (es lo esperado) |
+
+**Paso 4. Verificación completa con Docker** (opcional; también sin clonar el repositorio, porque la imagen del simulador es pública y trae los casos de prueba). Cambia `<clave>` por la clave del documento adjunto:
+
+```bash
+docker run --rm ghcr.io/kayy1y/gamestats-simulator:latest --target https://gamestats-ingestion.onrender.com --api-key <clave> --fixture all --expect --wait 240s
 ```
 
 Debe terminar con ocho líneas `ok`. Después, `curl -s https://gamestats-ingestion.onrender.com/v1/matches` ya muestra las partidas.
+
+> **macOS (zsh):** si la terminal se queda mostrando `quote>`, quedó una comilla sin cerrar al pegar. Pulsa `Ctrl + C` y pega el comando otra vez, de a uno.
 
 ---
 
@@ -191,20 +248,22 @@ El proyecto también está publicado en internet, para que puedas probarlo sin i
 **Antes de usarla, ten en cuenta:**
 - **Se duerme** si nadie la usa durante 15 minutos. La primera petición tarda alrededor de un minuto en despertarla. Abre el `/healthz` un minuto antes de la demo.
 - **Los resultados no duran:** están en memoria, así que cuando el servicio se duerme se borran. Si quieres estadísticas, genera datos de nuevo (sección 5.3 o la pestaña *Generar datos* de la aplicación).
-- **Escribir requiere clave:** los eventos nuevos llevan la clave de API (`X-API-Key`). Pídela al equipo; las lecturas (`GET`) son públicas.
+- **Escribir requiere clave:** los eventos nuevos llevan la clave de API (`X-API-Key`). La clave está en el **documento adjunto a la entrega**; en los comandos aparece como `<clave>` y hay que reemplazarla completa, incluidos los signos `<` y `>`. Las lecturas (`GET`) son públicas.
 
 ### Cómo probarla
 
 Con el navegador: abre https://gamestats-ingestion.onrender.com y sigue la [opción A](#a-consola-web-en-render-sin-instalar-nada).
 
-Con la aplicación de escritorio, apuntando a la nube:
+Con la terminal y sin el código (solo `curl`): sigue la [opción E](#e-terminal-contra-render-sin-el-código), que tiene los comandos para despertar el servicio, consultar y enviar una partida paso a paso.
+
+Con la aplicación de escritorio, apuntando a la nube (cambia `<clave>` por la clave del documento adjunto):
 ```bash
-./bin/gamestats-gui --target https://gamestats-ingestion.onrender.com --api-key TU_CLAVE
+./bin/gamestats-gui --target https://gamestats-ingestion.onrender.com --api-key <clave>
 ```
 
-Con la terminal, la verificación completa:
+Con la terminal y el repositorio clonado, la verificación completa (cambia `<clave>` igual que arriba):
 ```bash
-docker compose --profile demo run --rm --no-deps simulator --target https://gamestats-ingestion.onrender.com --api-key TU_CLAVE --fixture all --expect --wait 240s
+docker compose --profile demo run --rm --no-deps simulator --target https://gamestats-ingestion.onrender.com --api-key <clave> --fixture all --expect --wait 240s
 ```
 Debe terminar con 8 líneas `ok`.
 

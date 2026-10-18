@@ -13,7 +13,7 @@ Esta página responde una pregunta: **¿dónde está cada cosa que pide el enunc
 | **Imágenes Docker publicadas** | https://github.com/kayy1y?tab=packages |
 
 > La versión desplegada usa el plan gratuito de Render: si nadie la usa durante 15 minutos se duerme, y la primera petición tarda alrededor de un minuto en despertarla. Conviene abrir `/healthz` antes de probarla.
-> Para enviar eventos nuevos al servicio desplegado hace falta una clave de API, que se entrega aparte. Las consultas (`GET`) no la necesitan.
+> Para enviar eventos nuevos al servicio desplegado hace falta una clave de API. Está en el **documento adjunto a la entrega** («Links e información importante»); en los comandos aparece como `<clave>` y hay que reemplazarla completa, incluidos los signos `<` y `>`. Las consultas (`GET`) no la necesitan.
 
 ## Los entregables del enunciado y dónde están
 
