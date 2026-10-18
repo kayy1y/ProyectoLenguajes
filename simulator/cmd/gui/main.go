@@ -59,6 +59,7 @@ func main() {
 
 // build arma la ventana con sus pestañas; también la usa el test de capturas.
 func build(a fyne.App, l *lab.Lab, cat *lab.Catalog, target string) (fyne.Window, *container.AppTabs) {
+	a.Settings().SetTheme(gameStatsTheme{})
 	w := a.NewWindow("GameStats")
 	u := &ui{lab: l, cat: cat, win: w}
 
