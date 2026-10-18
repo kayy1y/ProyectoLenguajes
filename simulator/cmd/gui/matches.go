@@ -251,10 +251,8 @@ func (u *ui) fillDetail(box *fyne.Container, m lab.MatchSummary, r *lab.MatchRes
 		box.Add(wrapped("La partida no existe."))
 		return
 	}
-	st := widget.NewLabel(r.Status)
-	st.Importance = statusImportance(r.Status)
-	box.Add(container.NewHBox(widget.NewLabel(m.GameID+" ·"), st,
-		widget.NewLabel(fmt.Sprintf("· %d eventos · %d intento(s) · cierre: %s", r.EventCount, r.Attempts, dash(r.ClosedReason)))))
+	box.Add(container.NewHBox(container.NewCenter(newBadge("  "+r.Status+"  ", statusImportance(r.Status))),
+		widget.NewLabel(fmt.Sprintf("%s · %d eventos · %d intento(s) · cierre: %s", m.GameID, r.EventCount, r.Attempts, dash(r.ClosedReason)))))
 
 	if r.Status == "FAILED" {
 		box.Add(wrapped("El análisis falló: " + r.LastError))
@@ -280,27 +278,31 @@ func (u *ui) fillDetail(box *fyne.Container, m lab.MatchSummary, r *lab.MatchRes
 		return
 	}
 
-	addAll(box, widget.NewSeparator(), bold("Estadísticas de la partida"))
-	grid := container.NewGridWithColumns(4)
+	box.Add(section(theme.InfoIcon(), "Estadísticas de la partida"))
+	grid := container.NewGridWithColumns(3)
 	for _, kv := range lab.MatchMetrics(res) {
-		v := widget.NewLabelWithStyle(kv[1], fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
-		grid.Add(container.NewVBox(v, widget.NewLabel(kv[0])))
+		t := newStatTile(kv[0], widget.MediumImportance)
+		t.SetValue(kv[1])
+		grid.Add(t)
 	}
 	box.Add(grid)
 
-	addAll(box, widget.NewSeparator(), bold("Estadísticas por jugador"))
+	box.Add(section(theme.AccountIcon(), fmt.Sprintf("Estadísticas por jugador (%d)", len(res.PlayerStats))))
 	cols := lab.MetricColumns(res)
 	pt := widget.NewTable(
 		func() (int, int) { return len(res.PlayerStats), len(cols) + 1 },
 		func() fyne.CanvasObject { return widget.NewLabel("") },
 		func(id widget.TableCellID, o fyne.CanvasObject) {
-			p := res.PlayerStats[id.Row]
+			l, p := o.(*widget.Label), res.PlayerStats[id.Row]
 			if id.Col == 0 {
-				o.(*widget.Label).SetText(p.PlayerID)
+				l.TextStyle.Bold = true
+				l.SetText(p.PlayerID)
 				return
 			}
-			o.(*widget.Label).SetText(lab.Value(p.Metrics[cols[id.Col-1]]))
+			l.TextStyle.Bold = false
+			l.SetText(lab.Value(p.Metrics[cols[id.Col-1]]))
 		})
+	pt.StickyColumnCount = 1 // el jugador queda fijo al desplazarse a la derecha
 	pt.ShowHeaderRow = true
 	pt.CreateHeader = func() fyne.CanvasObject { return bold("") }
 	pt.UpdateHeader = func(id widget.TableCellID, o fyne.CanvasObject) {
@@ -316,26 +318,37 @@ func (u *ui) fillDetail(box *fyne.Container, m lab.MatchSummary, r *lab.MatchRes
 	}
 	rowsH := float32(len(res.PlayerStats)+1) * 38
 	box.Add(container.NewGridWrap(fyne.NewSize(600, min(rowsH, 300)), pt))
-	box.Add(widget.NewLabel("«—» = no calculable con los datos recibidos (el sistema no inventa valores)."))
+	note := widget.NewLabel("«—» = no calculable con los datos recibidos (el sistema no inventa valores).")
+	note.SizeName = theme.SizeNameCaptionText
+	box.Add(note)
 
-	addAll(box, widget.NewSeparator(), bold("Patrones secuenciales"))
+	box.Add(section(theme.MediaFastForwardIcon(), fmt.Sprintf("Patrones secuenciales (%d)", len(res.Patterns))))
 	if len(res.Patterns) == 0 {
 		box.Add(widget.NewLabel("Ningún patrón en esta partida."))
 	}
 	for _, p := range res.Patterns {
-		box.Add(wrapped("• " + lab.Pattern(p)))
+		icon := widget.NewIcon(theme.NewSuccessThemedResource(theme.MediaFastForwardIcon()))
+		box.Add(container.NewBorder(nil, nil, icon, nil, wrapped(lab.Pattern(p))))
 	}
 
-	addAll(box, widget.NewSeparator(), bold("Calidad de los datos"))
+	box.Add(section(theme.WarningIcon(), fmt.Sprintf("Calidad de los datos (%d avisos)", len(res.Warnings))))
 	box.Add(widget.NewLabel(fmt.Sprintf("Eventos recibidos %d · usados %d · ignorados %d",
 		res.Input.EventsReceived, res.Input.EventsUsed, res.Input.EventsIgnored)))
 	if len(res.Warnings) == 0 {
-		box.Add(widget.NewLabel("Sin avisos: todos los eventos eran coherentes."))
+		ok := widget.NewLabel("Sin avisos: todos los eventos eran coherentes.")
+		ok.Importance = widget.SuccessImportance
+		box.Add(ok)
 	}
 	for _, w := range res.Warnings {
-		l := wrapped(fmt.Sprintf("⚠ %s  %s: %s", w.EventID, w.Code, w.Message))
+		l := wrapped(fmt.Sprintf("%s  %s: %s", w.EventID, w.Code, w.Message))
 		l.Importance = widget.WarningImportance
-		box.Add(l)
+		icon := widget.NewIcon(theme.NewWarningThemedResource(theme.WarningIcon()))
+		box.Add(container.NewBorder(nil, nil, icon, nil, l))
 	}
 	box.Refresh()
+}
+
+// section es el título de una sección del detalle, con separador e icono.
+func section(icon fyne.Resource, title string) fyne.CanvasObject {
+	return container.NewVBox(widget.NewSeparator(), container.NewHBox(widget.NewIcon(icon), bold(title)))
 }
