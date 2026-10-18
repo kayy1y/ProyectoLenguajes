@@ -143,7 +143,7 @@ Instala una sola vez lo que pide tu sistema operativo:
 | Sistema | Qué instalar |
 |---|---|
 | macOS | [Go 1.26](https://go.dev/dl/) y `xcode-select --install` |
-| Windows | [Go 1.26](https://go.dev/dl/) y un gcc ([MSYS2](https://www.msys2.org/) o TDM-GCC) |
+| Windows | [Go 1.26](https://go.dev/dl/) y un gcc de 64 bits: `winget install -e --id BrechtSanders.WinLibs.POSIX.UCRT` (o [MSYS2](https://www.msys2.org/) / TDM-GCC) |
 | Linux (Debian/Ubuntu) | [Go 1.26](https://go.dev/dl/) y `sudo apt install gcc libgl1-mesa-dev xorg-dev libwayland-dev libxkbcommon-dev wayland-protocols` |
 
 Después, desde la carpeta del proyecto:
@@ -184,14 +184,14 @@ La pestaña **Guía** de la aplicación trae este mismo recorrido.
 
 | Pestaña | Qué puedes hacer |
 |---|---|
-| **Partidas** | Ver todas las partidas en vivo, filtrarlas y abrir el detalle de cualquiera |
+| **Partidas** | Ver los totales en tarjetas y todas las partidas en vivo; buscarlas, filtrarlas por juego o estado, ordenarlas por columna y abrir el detalle de cualquiera |
 | **Generar datos** | Enviar casos de prueba concretos, el escenario demo o una carga de muchas partidas en paralelo, con semilla y velocidad |
-| **Verificación** | Ejecutar la batería completa de pruebas y guardar el informe |
-| **Enviar evento** | Escribir un evento a mano o partir de un ejemplo del contrato |
-| **Rechazos** | Ver los últimos eventos rechazados y por qué |
+| **Verificación** | Ejecutar la batería completa de pruebas, ver el resumen por grupo y guardar el informe |
+| **Enviar evento** | Escribir un evento a mano o partir de un ejemplo del contrato; la app avisa si el JSON no es válido y lo puede formatear |
+| **Rechazos** | Ver los últimos eventos rechazados y por qué, filtrando por código |
 | **Guía** | Seguir el recorrido sugerido y ver los juegos soportados |
 
-Puedes repetir cualquier ejecución sin reiniciar nada: la aplicación usa identificadores nuevos cada vez.
+Puedes repetir cualquier ejecución sin reiniciar nada: la aplicación usa identificadores nuevos cada vez. Con `Ctrl+1` … `Ctrl+6` (o el menú **Ir a**) se cambia de pestaña.
 
 Para conectarla a un servidor remoto: `./bin/gamestats-gui --target http://<ip>:8080 --api-key <clave>`. Más detalles en [docs/gui.md](docs/gui.md).
 

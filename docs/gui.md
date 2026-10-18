@@ -30,21 +30,34 @@ Go 1.26 y un compilador de C, porque la ventana usa [Fyne](https://fyne.io), que
 | Sistema | Qué instalar |
 |---|---|
 | macOS | `xcode-select --install` |
-| Windows | gcc de MSYS2 o TDM-GCC |
+| Windows | un gcc de **64 bits**: `winget install -e --id BrechtSanders.WinLibs.POSIX.UCRT` (o MSYS2 / TDM-GCC). El MinGW clásico de 32 bits no sirve |
 | Linux (Debian/Ubuntu) | `sudo apt install gcc libgl1-mesa-dev xorg-dev libwayland-dev libxkbcommon-dev wayland-protocols` |
 
 Si no se quiere compilar, CI publica el ejecutable de los tres sistemas como artefacto (`gamestats-gui-Linux`, `-macOS` y `-Windows`) en cada ejecución de *Actions → CI*.
 
+Para comprobar solo que la interfaz compila, sin compilador de C: `make gui-check` (la compila para WebAssembly y corre `go vet`).
+
 ## Pestañas
+
+La cabecera muestra el servidor y un indicador de la ingestión (verde con el tiempo de respuesta, rojo si no responde).
 
 | Pestaña | Para qué sirve |
 |---|---|
-| **Partidas** | Lista en vivo de las partidas, con filtro. Al seleccionar una se ven sus estadísticas por partida y por jugador, sus patrones y los avisos de calidad de datos. Un valor no calculable aparece como «—». Las columnas salen de las claves de `metrics`, así que la misma vista sirve para cualquier juego |
-| **Generar datos** | Envía fixtures, el escenario `demo` o carga (`stress`) con semilla y velocidad. Muestra el progreso, las respuestas HTTP explicadas y si cada fixture coincide con el resultado calculado a mano |
-| **Verificación** | Ejecuta la suite de 37 comprobaciones y guarda un informe Markdown para `docs/evidence/` |
-| **Enviar evento** | Editor JSON con las plantillas válidas e inválidas del contrato; muestra el código HTTP y la respuesta |
-| **Rechazos** | Últimos eventos rechazados con su código y campo |
+| **Partidas** | Tarjetas con los totales (partidas, aceptados, rechazados, duplicados, tardíos) y lista en vivo de las partidas, con búsqueda, filtros por juego y estado y orden por cualquier columna (clic en el encabezado). Al seleccionar una se ven sus estadísticas por partida (en tarjetas) y por jugador, sus patrones y los avisos de calidad de datos. Un valor no calculable aparece como «—». Las columnas salen de las claves de `metrics`, así que la misma vista sirve para cualquier juego |
+| **Generar datos** | Envía fixtures, el escenario `demo` o carga (`stress`) con semilla y velocidad. Valida la semilla y el número de partidas antes de enviar. Muestra el progreso, las respuestas HTTP con colores y explicadas, y si cada fixture coincide con el resultado calculado a mano |
+| **Verificación** | Ejecuta la suite de 37 comprobaciones, con un resumen por grupo, y guarda un informe Markdown para `docs/evidence/` |
+| **Enviar evento** | Editor JSON con las plantillas válidas e inválidas del contrato, aviso en vivo si el JSON no es válido y botón para formatearlo; muestra el código HTTP y la respuesta |
+| **Rechazos** | Últimos eventos rechazados con su código (en color) y campo, con filtro por código |
 | **Guía** | Recorrido de 5 pasos para el evaluador y catálogo de juegos |
+
+Al terminar *Generar datos* o la *Verificación* la app envía una notificación del sistema.
+
+## Menú y atajos
+
+| Atajo | Acción |
+|---|---|
+| `Ctrl+1` … `Ctrl+6` (`Cmd` en macOS) | Ir a cada pestaña, en el orden de arriba (también en el menú **Ir a**) |
+| **Ayuda → Acerca de** | Qué es GameStats y cómo se reparte el trabajo entre Go y Scala |
 
 ## Suite de verificación (37 comprobaciones)
 
@@ -61,7 +74,7 @@ Cada ejecución usa un sufijo propio en `matchId` y `eventId`, porque las partid
 | Ruta | Contenido |
 |---|---|
 | `simulator/cmd/gui` | La ventana (Fyne). Se compila solo con `-tags gui`, para que el simulador, las imágenes Docker y el resto de CI no dependan de librerías gráficas |
-| `simulator/internal/lab` | Lógica sin interfaz: catálogo leído de `contracts/`, generación de datos y suite de verificación (reusa `scenario` y `sender`), cliente de la API y formato de métricas |
+| `simulator/internal/lab` | Lógica sin interfaz: catálogo leído de `contracts/`, generación de datos y suite de verificación (reusa `scenario` y `sender`), cliente de la API, formato de métricas y orden de partidas |
 | `simulator/internal/verify` | Comparación con `contracts/expected` y con los códigos de los inválidos; también la usa el CLI (`--expect`) |
 
 Agregar un juego (esquema, analizador y fixture) no requiere cambiar la app: los juegos se leen de `contracts/schemas/games` y las columnas salen de los datos.
