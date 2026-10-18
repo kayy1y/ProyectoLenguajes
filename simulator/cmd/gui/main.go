@@ -20,7 +20,6 @@ import (
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/theme"
-	"fyne.io/fyne/v2/widget"
 
 	"gamestats/simulator/internal/lab"
 )
@@ -65,11 +64,6 @@ func build(a fyne.App, l *lab.Lab, cat *lab.Catalog, target string) (fyne.Window
 	w.SetIcon(appIcon)
 	u := &ui{lab: l, cat: cat, win: w}
 
-	health := widget.NewLabel("ingestión: …")
-	header := container.NewBorder(nil, nil,
-		widget.NewLabelWithStyle("GameStats", fyne.TextAlignLeading, fyne.TextStyle{Bold: true}),
-		health, widget.NewLabel(target))
-
 	tabs := container.NewAppTabs(
 		container.NewTabItemWithIcon("Partidas", theme.ListIcon(), u.matchesTab()),
 		container.NewTabItemWithIcon("Generar datos", theme.MediaPlayIcon(), u.generateTab()),
@@ -78,24 +72,8 @@ func build(a fyne.App, l *lab.Lab, cat *lab.Catalog, target string) (fyne.Window
 		container.NewTabItemWithIcon("Rechazos", theme.WarningIcon(), u.rejectionsTab()),
 		container.NewTabItemWithIcon("Guía", theme.HelpIcon(), u.guideTab()),
 	)
-	w.SetContent(container.NewBorder(container.NewPadded(header), nil, nil, nil, tabs))
+	w.SetContent(container.NewBorder(u.header(target), nil, nil, nil, tabs))
 	w.Resize(fyne.NewSize(1180, 760))
-
-	go every(3*time.Second, func() {
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-		ok := l.Health(ctx)
-		cancel()
-		fyne.Do(func() {
-			if ok {
-				health.SetText("ingestión ✓")
-				health.Importance = widget.SuccessImportance
-			} else {
-				health.SetText("ingestión no responde")
-				health.Importance = widget.DangerImportance
-			}
-			health.Refresh()
-		})
-	})
 	return w, tabs
 }
 
