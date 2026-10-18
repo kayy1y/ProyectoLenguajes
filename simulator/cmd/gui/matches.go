@@ -125,22 +125,54 @@ func (u *ui) matchesTab() fyne.CanvasObject {
 	problem.Truncation = fyne.TextTruncateEllipsis
 	problem.Importance = widget.DangerImportance
 	problem.Hide()
+
+	const allGames, allStates = "Todos los juegos", "Todos los estados"
+	games := []string{allGames}
+	for _, g := range u.cat.Games {
+		games = append(games, g.GameID)
+	}
+	gameSel := widget.NewSelect(games, nil)
+	stateSel := widget.NewSelect([]string{allStates, "COLLECTING", "FINISHING", "ANALYZING", "RETRYING", "ANALYZED", "FAILED"}, nil)
+	count := widget.NewLabel("")
+	count.SizeName = theme.SizeNameCaptionText
+	empty := wrapped("")
+	empty.Alignment = fyne.TextAlignCenter
+
 	apply = func() {
 		rows = rows[:0]
 		for _, m := range all {
-			if filter == "" || strings.Contains(strings.ToLower(m.MatchID+" "+m.GameID+" "+m.Status), filter) {
-				rows = append(rows, m)
+			switch {
+			case gameSel.Selected != allGames && m.GameID != gameSel.Selected,
+				stateSel.Selected != allStates && m.Status != stateSel.Selected,
+				filter != "" && !strings.Contains(strings.ToLower(m.MatchID+" "+m.GameID+" "+m.Status), filter):
+				continue
 			}
+			rows = append(rows, m)
 		}
 		key := ""
 		if sortCol >= 0 {
 			key = sortKeys[sortCol]
 		}
 		lab.SortMatches(rows, key, sortDesc)
+		count.SetText(fmt.Sprintf("Mostrando %d de %d partidas", len(rows), len(all)))
+		switch {
+		case len(all) == 0:
+			empty.SetText("Todavía no hay partidas.\nVe a «Generar datos» y ejecuta el escenario demo.")
+			empty.Show()
+		case len(rows) == 0:
+			empty.SetText("Ninguna partida coincide con los filtros.")
+			empty.Show()
+		default:
+			empty.Hide()
+		}
 		table.Refresh()
 	}
+	gameSel.OnChanged = func(string) { apply() }
+	stateSel.OnChanged = func(string) { apply() }
+	gameSel.SetSelected(allGames)
+	stateSel.SetSelected(allStates)
 	search := widget.NewEntry()
-	search.SetPlaceHolder("Filtrar por partida, juego o estado…")
+	search.SetPlaceHolder("Buscar partida…")
 	search.OnChanged = func(s string) { filter = strings.ToLower(strings.TrimSpace(s)); apply() }
 
 	refresh := func() {
@@ -168,8 +200,10 @@ func (u *ui) matchesTab() fyne.CanvasObject {
 	})
 	go every(3*time.Second, refresh)
 
-	top := container.NewVBox(kpis, problem, container.NewBorder(nil, nil, nil, refreshBtn, search))
-	left := container.NewBorder(top, nil, nil, nil, table)
+	top := container.NewVBox(kpis, problem,
+		container.NewBorder(nil, nil, nil, refreshBtn, search),
+		container.NewGridWithColumns(2, gameSel, stateSel))
+	left := container.NewBorder(top, count, nil, nil, container.NewStack(table, container.NewCenter(empty)))
 	split := container.NewHSplit(left, container.NewVScroll(container.NewPadded(detail)))
 	split.Offset = 0.52
 	return split
