@@ -3,6 +3,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"sort"
 	"strconv"
@@ -46,6 +47,18 @@ func (u *ui) generateTab() fyne.CanvasObject {
 	seed.SetText("42")
 	matches := widget.NewEntry()
 	matches.SetText("20")
+	seed.Validator = func(s string) error {
+		if _, err := strconv.ParseUint(strings.TrimSpace(s), 10, 64); err != nil {
+			return errors.New("la semilla debe ser un número entero positivo, por ejemplo 42")
+		}
+		return nil
+	}
+	matches.Validator = func(s string) error {
+		if n, err := strconv.Atoi(strings.TrimSpace(s)); err != nil || n < 1 || n > 200 {
+			return errors.New("las partidas deben ser un número entre 1 y 200")
+		}
+		return nil
+	}
 	speed := widget.NewSelect([]string{"Rápido", "Normal", "Lento (se ve el intercalado)"}, nil)
 	speed.SetSelected("Rápido")
 
@@ -86,8 +99,20 @@ func (u *ui) generateTab() fyne.CanvasObject {
 	var run *widget.Button
 	run = widget.NewButtonWithIcon("Ejecutar", theme.MediaPlayIcon(), func() {
 		req := lab.RunRequest{Speed: speeds[speed.Selected]}
-		s, _ := strconv.ParseUint(strings.TrimSpace(seed.Text), 10, 64)
-		req.Seed = s
+		// Antes una semilla inválida se convertía en 0 sin avisar.
+		if mode.Selected != modeFixtures {
+			if err := seed.Validate(); err != nil {
+				dialog.ShowError(err, u.win)
+				return
+			}
+		}
+		if mode.Selected == modeStress {
+			if err := matches.Validate(); err != nil {
+				dialog.ShowError(err, u.win)
+				return
+			}
+		}
+		req.Seed, _ = strconv.ParseUint(strings.TrimSpace(seed.Text), 10, 64)
 		switch mode.Selected {
 		case modeDemo:
 			req.Kind = "demo"
@@ -153,17 +178,17 @@ func drawRun(j *lab.Job, progress *widget.ProgressBar, state *widget.Label, out 
 	}
 	sort.Strings(keys)
 	for _, k := range keys {
-		line := fmt.Sprintf("%5d   %s", j.Counts[k], k)
+		row := container.NewHBox(container.NewCenter(newBadge(fmt.Sprintf(" %d ", j.Counts[k]), httpImportance(k))),
+			widget.NewLabelWithStyle(k, fyne.TextAlignLeading, fyne.TextStyle{Monospace: true}))
 		if e := lab.Explain(k); e != "" {
-			line += "   —  " + e
+			row.Add(widget.NewLabel("— " + e))
 		}
-		out.Add(widget.NewLabelWithStyle(line, fyne.TextAlignLeading, fyne.TextStyle{Monospace: true}))
+		out.Add(row)
 	}
 	if len(j.Matches) > 0 {
 		addAll(out, widget.NewSeparator(), bold("Partidas"))
 		for _, m := range j.Matches {
-			st := widget.NewLabel(m.Status)
-			st.Importance = statusImportance(m.Status)
+			st := container.NewCenter(newBadge(" "+m.Status+" ", statusImportance(m.Status)))
 			row := container.NewHBox(widget.NewLabel(fmt.Sprintf("%s / %s", m.GameID, m.MatchID)), st,
 				widget.NewLabel(fmt.Sprintf("%d eventos", m.EventCount)))
 			if len(m.Patterns) > 0 {
@@ -174,12 +199,22 @@ func drawRun(j *lab.Job, progress *widget.ProgressBar, state *widget.Label, out 
 				if m.Check.Pass {
 					verdict = "PASS"
 				}
-				c := widget.NewLabel("calculado a mano: " + verdict)
-				c.Importance = statusImportance(verdict)
-				row.Add(c)
+				row.Add(container.NewCenter(newBadge(" calculado a mano: "+verdict+" ", statusImportance(verdict))))
 			}
 			out.Add(row)
 		}
 	}
 	out.Refresh()
+}
+
+// httpImportance colorea una respuesta de la ingestión según su código HTTP
+// ("202 ACCEPTED", "409 REJECTED LATE_EVENT", …).
+func httpImportance(key string) widget.Importance {
+	switch {
+	case strings.HasPrefix(key, "2"):
+		return widget.SuccessImportance
+	case strings.HasPrefix(key, "400"), strings.HasPrefix(key, "5"):
+		return widget.DangerImportance
+	}
+	return widget.WarningImportance
 }
