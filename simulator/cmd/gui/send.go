@@ -3,6 +3,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -33,7 +34,25 @@ func (u *ui) sendTab() fyne.CanvasObject {
 	response := widget.NewMultiLineEntry()
 	response.TextStyle = fyne.TextStyle{Monospace: true}
 	response.SetMinRowsVisible(8)
-	code := widget.NewLabelWithStyle("", fyne.TextAlignLeading, fyne.TextStyle{Bold: true})
+	code := newBadge(" sin enviar ", widget.MediumImportance)
+	valid := widget.NewLabel("")
+	editor.OnChanged = func(s string) {
+		if json.Valid([]byte(s)) {
+			valid.SetText("✓ JSON válido")
+			valid.Importance = widget.SuccessImportance
+		} else {
+			valid.SetText("✗ JSON inválido: revisa comas, llaves y comillas")
+			valid.Importance = widget.DangerImportance
+		}
+		valid.Refresh()
+	}
+	editor.OnChanged(editor.Text)
+	format := widget.NewButtonWithIcon("Formatear", theme.DocumentIcon(), func() {
+		var out bytes.Buffer
+		if json.Indent(&out, []byte(editor.Text), "", "  ") == nil {
+			editor.SetText(out.String())
+		}
+	})
 
 	var opts []string
 	kindOf := map[string]string{}
@@ -85,16 +104,11 @@ func (u *ui) sendTab() fyne.CanvasObject {
 			cancel()
 			fyne.Do(func() {
 				if err != nil {
-					code.SetText("Sin respuesta: " + err.Error())
-					code.Importance = widget.DangerImportance
-				} else {
-					code.SetText(fmt.Sprintf("HTTP %d", st))
-					code.Importance = widget.WarningImportance
-					if st == 200 || st == 202 {
-						code.Importance = widget.SuccessImportance
-					}
+					code.Set(" sin respuesta ", widget.DangerImportance)
+					response.SetText(err.Error())
+					return
 				}
-				code.Refresh()
+				code.Set(fmt.Sprintf(" HTTP %d ", st), httpImportance(fmt.Sprint(st)))
 				response.SetText(resp)
 			})
 		}()
@@ -102,7 +116,7 @@ func (u *ui) sendTab() fyne.CanvasObject {
 	send.Importance = widget.HighImportance
 
 	top := container.NewVBox(wrapped("Construye un evento a mano, o parte de un ejemplo del contrato, y mira cómo responde la ingestión."),
-		container.NewBorder(nil, nil, nil, container.NewHBox(fresh, send), tpl), note)
-	bottom := container.NewVBox(code, response)
+		container.NewBorder(nil, nil, nil, container.NewHBox(format, fresh, send), tpl), note)
+	bottom := container.NewVBox(valid, container.NewHBox(bold("Respuesta"), code), response)
 	return container.NewPadded(container.NewBorder(top, bottom, nil, nil, editor))
 }
