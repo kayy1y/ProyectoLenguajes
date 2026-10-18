@@ -38,6 +38,14 @@ func TestWindowBuildsWithoutIngestion(t *testing.T) {
 	if n != 6 {
 		t.Fatalf("pestañas = %d, want 6", n)
 	}
+	// El menú «Ir a» tiene una opción (con su atajo Ctrl+1…6) por pestaña.
+	menu := w.MainMenu()
+	if menu == nil || len(menu.Items) != 3 {
+		t.Fatalf("menú principal = %+v, want Archivo, Ir a y Ayuda", menu)
+	}
+	if goTo := menu.Items[1].Items; len(goTo) != n || goTo[0].Shortcut == nil {
+		t.Fatalf("menú Ir a: %d opciones, want %d con atajo", len(goTo), n)
+	}
 	w.Close()
 }
 
