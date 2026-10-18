@@ -21,36 +21,49 @@ func (u *ui) matchesTab() fyne.CanvasObject {
 	var all, rows []lab.MatchSummary
 	filter := ""
 	headers := []string{"Juego", "Partida", "Estado", "Completitud", "Eventos"}
-	widths := []float32{115, 170, 95, 105, 60}
+	widths := []float32{110, 120, 135, 140, 60}
 
 	detail := container.NewVBox(wrapped("Selecciona una partida para ver sus estadísticas."))
 	var selected *lab.MatchSummary
 
 	table := widget.NewTable(
 		func() (int, int) { return len(rows), len(headers) },
-		func() fyne.CanvasObject { return widget.NewLabel("") },
+		func() fyne.CanvasObject {
+			l := widget.NewLabel("")
+			l.Truncation = fyne.TextTruncateEllipsis
+			return container.NewBorder(nil, nil, widget.NewIcon(nil), nil, l)
+		},
 		func(id widget.TableCellID, o fyne.CanvasObject) {
-			l := o.(*widget.Label)
+			c := o.(*fyne.Container)
+			l, icon := c.Objects[0].(*widget.Label), c.Objects[1].(*widget.Icon)
 			if id.Row >= len(rows) {
 				return
 			}
 			m := rows[id.Row]
 			l.Importance = widget.MediumImportance
+			l.TextStyle = fyne.TextStyle{}
+			icon.Hide()
 			switch id.Col {
 			case 0:
 				l.SetText(m.GameID)
 			case 1:
 				l.SetText(m.MatchID)
-			case 2:
-				l.Importance = statusImportance(m.Status)
-				l.SetText(m.Status)
-			case 3:
-				l.Importance = statusImportance(m.Completeness)
-				l.SetText(dash(m.Completeness))
+			case 2, 3:
+				s := m.Status
+				if id.Col == 3 {
+					s = m.Completeness
+				}
+				l.Importance = statusImportance(s)
+				l.TextStyle.Bold = true
+				l.SetText(dash(s))
+				if r := statusIcon(s); r != nil {
+					icon.SetResource(r)
+					icon.Show()
+				}
 			case 4:
 				l.SetText(fmt.Sprint(m.EventCount))
 			}
-			l.Refresh()
+			c.Refresh() // vuelve a acomodar la celda si el icono se mostró u ocultó
 		})
 	table.ShowHeaderRow = true
 	table.CreateHeader = func() fyne.CanvasObject { return bold("") }
@@ -124,7 +137,7 @@ func (u *ui) matchesTab() fyne.CanvasObject {
 	top := container.NewVBox(kpis, problem, container.NewBorder(nil, nil, nil, refreshBtn, search))
 	left := container.NewBorder(top, nil, nil, nil, table)
 	split := container.NewHSplit(left, container.NewVScroll(container.NewPadded(detail)))
-	split.Offset = 0.5
+	split.Offset = 0.52
 	return split
 }
 

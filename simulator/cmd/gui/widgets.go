@@ -123,8 +123,31 @@ func statusImportance(s string) widget.Importance {
 		return widget.DangerImportance
 	case "RETRYING", "INCOMPLETE":
 		return widget.WarningImportance
+	case "COLLECTING", "FINISHING", "ANALYZING":
+		return widget.HighImportance
 	}
 	return widget.MediumImportance
+}
+
+// statusIcon es el icono, ya con su color, de un estado de partida o de completitud.
+func statusIcon(s string) fyne.Resource {
+	switch s {
+	case "ANALYZED", "COMPLETE", "PASS":
+		return theme.NewSuccessThemedResource(theme.ConfirmIcon())
+	case "FAILED", "FAIL", "TIMEOUT":
+		return theme.NewErrorThemedResource(theme.ErrorIcon())
+	case "RETRYING":
+		return theme.NewWarningThemedResource(theme.MediaReplayIcon())
+	case "INCOMPLETE":
+		return theme.NewWarningThemedResource(theme.WarningIcon())
+	case "COLLECTING":
+		return theme.NewPrimaryThemedResource(theme.DownloadIcon())
+	case "FINISHING":
+		return theme.NewPrimaryThemedResource(theme.HistoryIcon())
+	case "ANALYZING":
+		return theme.NewPrimaryThemedResource(theme.SearchIcon())
+	}
+	return nil
 }
 
 func addAll(c *fyne.Container, objs ...fyne.CanvasObject) {
